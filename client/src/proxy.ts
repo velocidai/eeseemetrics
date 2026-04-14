@@ -31,6 +31,7 @@ export async function proxy(request: NextRequest) {
       "login",
       "signup",
       "subscribe",
+      "ltd",
       "invitation",
       "reset-password",
       "auth",
