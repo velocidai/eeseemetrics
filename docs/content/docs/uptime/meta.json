@@ -1,0 +1,4 @@
+{
+  "title": "Uptime Monitoring",
+  "pages": ["index", "monitors", "incidents", "notifications"]
+}

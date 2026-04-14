@@ -1,0 +1,124 @@
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useExtracted } from "next-intl";
+import Link from "next/link";
+
+export function FAQAccordion() {
+  const t = useExtracted();
+  return (
+    <div className="bg-neutral-100/50 dark:bg-neutral-800/20 backdrop-blur-sm border border-neutral-300/50 dark:border-neutral-800/50 rounded-xl overflow-hidden">
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="item-1">
+          <AccordionTrigger className="md:text-lg">{t("Is Eesee Metrics GDPR and CCPA compliant?")}</AccordionTrigger>
+          <AccordionContent>
+            {t("Yes, Eesee Metrics is fully compliant with GDPR, CCPA, and other privacy regulations. We don't use cookies or collect any personal data that could identify your users. We salt user IDs daily to ensure users are not fingerprinted. You will not need to display a cookie consent banner to your users.")}
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-2">
+          <AccordionTrigger className="md:text-lg">{t("Eesee Metrics vs. Google Analytics")}</AccordionTrigger>
+          <AccordionContent>
+            <p>
+              {t("Google Analytics is free because it's a data collection tool for Google's ad machine — your visitors' data funds their business. Eesee Metrics has one goal: give you clear, actionable insights without compromising your visitors' privacy.")}
+            </p>
+            <br />
+            <p>
+              {t("We also go further: automated weekly reports summarise what changed in plain English, and anomaly detection flags unusual traffic patterns automatically — so you spend less time in dashboards and more time acting on what matters.")}
+            </p>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-3">
+          <AccordionTrigger className="md:text-lg">{t("Eesee Metrics vs. Plausible/Umami/Fathom")}</AccordionTrigger>
+          <AccordionContent>
+            <p>
+              {t("Eesee Metrics is similar to these simple and privacy-focused analytics platforms, but we are raising the bar when it comes to UX and the quality and scope of our feature set.")}
+            </p>
+            <br />
+            <p>
+              {t("We don't want to just be a simple analytics tool, but we carefully craft every feature to be understandable without having to read pages of documentation.")}
+            </p>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-4">
+          <AccordionTrigger className="md:text-lg">{t("Eesee Metrics vs. Posthog/Mixpanel/Amplitude")}</AccordionTrigger>
+          <AccordionContent>
+            <p>
+              {t("Eesee Metrics has most of the features of enterprise analytics platforms, but packaged in a way that is usable for small and medium sized teams.")}
+            </p>
+            <br />
+            <p>
+              {t("We have advanced features like session replay, error tracking, web vitals, and funnels - but you don't need to spend days learning how to use them.")}
+            </p>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-6">
+          <AccordionTrigger className="md:text-lg">{t("How easy is it to set up Eesee Metrics?")}</AccordionTrigger>
+          <AccordionContent>
+            <Link
+              href="/docs/script"
+              className="text-[#26B0A2] dark:text-[#2FC7B8] hover:text-[#2FC7B8] dark:hover:text-[#2FC7B8]/80"
+            >
+              {t("Setting up Eesee Metrics")}
+            </Link>{" "}
+            {t("is incredibly simple. Just add a small script tag to your website's <head> and you're good to go. Most users are up and running in less than 5 minutes. We also provide comprehensive documentation and support if you need any help.")}
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-7">
+          <AccordionTrigger className="md:text-lg">{t("What platforms does Eesee Metrics support?")}</AccordionTrigger>
+          <AccordionContent>
+            {t("Eesee Metrics works with virtually any website platform. Whether you're using WordPress, Shopify, Next.js, React, Vue, or any other framework, our simple tracking snippet integrates seamlessly. Check out our")}{" "}
+            <Link
+              href="/docs"
+              className="text-[#26B0A2] dark:text-[#2FC7B8] hover:text-[#2FC7B8] dark:hover:text-[#2FC7B8]/80"
+            >
+              {t("documentation")}
+            </Link>{" "}
+            {t("for setup guides.")}
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-9">
+          <AccordionTrigger className="md:text-lg">{t("Can I invite my team to my organization?")}</AccordionTrigger>
+          <AccordionContent>
+            {t("Yes, you can invite unlimited team members to your organization. Each member can have different permission levels to view or manage your analytics dashboards.")}
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-10">
+          <AccordionTrigger className="md:text-lg">{t("Can I share my dashboard publicly?")}</AccordionTrigger>
+          <AccordionContent>
+            {t("Yes, you can share your dashboard publicly in two ways: with a secret link that only people with the URL can access, or as a completely public dashboard that anyone can view.")}
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-piel">
+          <AccordionTrigger className="md:text-lg">{t("How do weekly reports work?")}</AccordionTrigger>
+          <AccordionContent>
+            <p>
+              {t("Every week, Eesee generates a plain-English email summary of your site's performance — top pages, top referrers, biggest changes versus the previous period. No dashboard required. Reports are available on Pro and Scale plans.")}
+            </p>
+            <br />
+            <p>
+              {t("Eesee also monitors your metrics for anomalies: unusual spikes in sessions, unexpected drops in conversions, or sudden changes in bounce rate. When something happens, you're notified automatically via email, Slack, Discord, or webhook. No thresholds to configure.")}
+            </p>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-11">
+          <AccordionTrigger className="md:text-lg">{t("Does Eesee Metrics have an API?")}</AccordionTrigger>
+          <AccordionContent>
+            {t("Yes, Eesee Metrics provides a comprehensive")}{" "}
+            <Link
+              href="/docs/api/getting-started"
+              className="text-[#26B0A2] dark:text-[#2FC7B8] hover:text-[#2FC7B8] dark:hover:text-[#2FC7B8]/80"
+            >
+              {t("API")}
+            </Link>{" "}
+            {t("that allows you to programmatically access your analytics data. You can integrate Eesee Metrics data into your own applications, dashboards, or workflows.")}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
+  );
+}

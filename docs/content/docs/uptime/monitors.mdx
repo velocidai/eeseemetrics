@@ -1,0 +1,111 @@
+---
+title: Monitors
+description: Create and manage HTTP and TCP uptime monitors
+---
+
+A monitor is a recurring check against an endpoint. Eesee runs your monitors at a configured interval from one or more regions and records the result — status, response time, and any validation errors.
+
+## Creating a monitor
+
+1. Go to your site → **Monitoring → Monitors** (or **Uptime → Monitors** from the org view)
+2. Click **Add monitor**
+3. Choose HTTP or TCP
+4. Configure the monitor settings
+5. Click **Save**
+
+The monitor starts running immediately after creation.
+
+## Monitor types
+
+### HTTP monitor
+
+Checks a URL over HTTP or HTTPS. Eesee makes a real HTTP request and records:
+
+- HTTP status code
+- Response time (with breakdown: DNS, TCP handshake, TLS handshake, TTFB, transfer)
+- Response body and headers (for validation rules)
+
+**Required settings:**
+- **URL** — the endpoint to check (e.g. `https://yoursite.com/health`)
+- **Method** — GET, POST, PUT, PATCH, DELETE, HEAD (default: GET)
+
+**Optional settings:**
+- **Request body** — send a JSON or text body with the request
+- **Request headers** — add custom headers (e.g. authentication tokens)
+- **Follow redirects** — whether to follow HTTP 3xx redirects (default: on)
+- **Check interval** — how often to run the check (1, 5, 10, 15, 30, or 60 minutes)
+- **Timeout** — fail the check if no response within N seconds (default: 30)
+
+### TCP monitor
+
+Opens a raw TCP connection to a host and port. Useful for monitoring databases, mail servers, or any non-HTTP service.
+
+**Required settings:**
+- **Host** — hostname or IP address
+- **Port** — TCP port number
+
+**Optional settings:**
+- **Check interval**, **Timeout** — same as HTTP monitors
+
+## Validation rules
+
+Validation rules let you define what a "healthy" response looks like. A monitor can pass the connection check but fail a validation rule — both are recorded separately.
+
+| Rule type | What it checks |
+|---|---|
+| **Status code** | HTTP response code equals a specific value (e.g. 200) |
+| **Response time** | Total response time under a threshold (e.g. < 2000ms) |
+| **Body contains** | Response body includes a specific string |
+| **Body does not contain** | Response body does not include a specific string |
+| **Header equals** | A response header has a specific value |
+
+Add multiple rules to a monitor — all must pass for the check to be considered healthy.
+
+**Example:** A monitor on your `/api/health` endpoint that requires:
+- Status code = 200
+- Body contains `"status":"ok"`
+- Response time < 1500ms
+
+## Check intervals
+
+| Interval | Description |
+|---|---|
+| 1 minute | Near-real-time; highest check frequency |
+| 5 minutes | Good default for most endpoints |
+| 10 minutes | Lower frequency for less critical services |
+| 15 / 30 / 60 minutes | For endpoints that are expensive to check |
+
+## Multi-region monitoring
+
+Checks can be distributed across multiple regions to distinguish a real outage from a regional network issue. When enabled, Eesee runs the check from each selected region independently.
+
+If a monitor shows as down from all regions simultaneously, it's almost certainly a real outage. If it only fails from one region, it may be a network issue local to that region.
+
+## Monitor status
+
+Each monitor has one of three statuses:
+
+| Status | Meaning |
+|---|---|
+| **Up** | Last check passed all validation rules |
+| **Down** | Last check failed — either connection error or validation failure |
+| **Unknown** | Monitor has not run yet or has not reported recently |
+
+The **Monitors** page shows a colored status indicator, current uptime percentage (30-day rolling), and the last checked time for each monitor.
+
+## Monitor detail view
+
+Click any monitor to open its detail page:
+
+- **Status history** — a timeline of up/down checks
+- **Response time chart** — average response time over the selected period
+- **Uptime percentage** — 24h, 7d, and 30d rolling windows
+- **Recent incidents** — downtime events linked to this monitor
+
+## Editing and deleting monitors
+
+From the **Monitors** list:
+- Click the **⋮** menu on any monitor row
+- Select **Edit** to change settings, or **Delete** to remove it
+
+Deleting a monitor also removes all associated check history and incidents.

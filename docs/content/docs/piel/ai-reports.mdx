@@ -1,0 +1,76 @@
+---
+title: AI Reports
+description: AI-generated analytics reports delivered on a schedule and accessible in your dashboard
+---
+
+Eesee Metrics automatically generates plain-English analytics reports on a schedule based on your plan. Reports are stored in your dashboard so you can browse, read, and share them at any time — and retrieve them via the MCP integration.
+
+## What's in a report
+
+Each report is a structured AI-generated summary covering:
+
+- **Overview metrics** — sessions, pageviews, unique visitors, bounce rate, and average session duration for the period, with percentage changes versus the prior equivalent period
+- **Visitor split** — new vs. returning visitor ratio
+- **Summary** — a 2–4 sentence plain-English narrative of the period's performance
+- **Highlights** — key findings tagged as positive, negative, or neutral, with the metric and observation
+- **Goals** — conversion counts and conversion rates for your configured goals
+- **Top pages** — the 5 pages that drove the most sessions
+- **Top referrers** — top traffic sources
+- **Top countries** — geographic breakdown
+- **Device breakdown** — desktop / mobile / tablet split
+- **Recommendations** — 3–5 actionable suggestions based on the period's data
+- **Top search queries** — if Google Search Console is connected, the top queries by clicks with position data
+
+## Report cadence
+
+| Cadence | Period covered | When generated | Plan |
+|---|---|---|---|
+| Weekly | Past 7 days | Every Monday | Pro, Scale |
+| Monthly | Past calendar month | 1st of each month | Scale |
+| Quarterly | Past calendar quarter | 1st of each quarter | Scale |
+| Yearly | Past calendar year | January 1st | Scale |
+
+Reports are generated automatically — no action required. If a site has fewer than 7 days of data when a weekly report is due, that report is skipped until there's enough history.
+
+## Accessing reports
+
+1. Open your site in the dashboard
+2. Go to **Insights → Reports** in the sidebar
+3. Browse the list — each row shows the cadence, the period covered, and the generation time
+4. Click any report to open the full structured view
+
+Reports are sorted by date, most recent first. A small badge on the sidebar item shows how many unread reports are waiting.
+
+## Email delivery
+
+Reports are also delivered by email. The weekly report arrives every Monday. Monthly, quarterly, and yearly reports are emailed when generated.
+
+To toggle email delivery:
+
+1. Go to **Insights → Reports**
+2. Use the **Email reports** toggle in the top-right corner of the page
+
+This setting is per-account and only affects your email — other organization members are not affected.
+
+## Retrieving reports via MCP
+
+If you have the MCP integration connected, you can retrieve reports directly from Claude or Cursor:
+
+```
+get_latest_report()                    — most recent report of any cadence
+get_latest_report(cadence: "monthly")  — most recent monthly report
+get_all_reports()                      — list of all available reports (Scale)
+```
+
+The AI tool returns the full structured summary, which you can then ask follow-up questions about.
+
+## Plan availability
+
+| Feature | Starter | Pro | Scale |
+|---|---|---|---|
+| Weekly reports | — | ✓ | ✓ |
+| Monthly reports | — | — | ✓ |
+| Quarterly reports | — | — | ✓ |
+| Yearly reports | — | — | ✓ |
+| Email delivery | — | ✓ | ✓ |
+| MCP access | — | ✓ | ✓ |

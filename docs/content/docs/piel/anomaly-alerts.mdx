@@ -1,0 +1,81 @@
+---
+title: Anomaly Alerts
+description: Automatic detection and notification when your metrics behave unusually
+---
+
+Eesee monitors your site's key metrics every day. When a metric deviates significantly from its recent baseline, an alert is created — and you can be notified via email, Slack, Discord, or webhook.
+
+## How detection works
+
+Every day at 06:00 UTC, the previous day's metrics are compared against a 7-day rolling baseline (excluding the day being analyzed).
+
+**Monitored metrics:**
+
+| Metric | Alert threshold | High severity threshold |
+|---|---|---|
+| Sessions | ±30% from baseline | ±50% |
+| Pageviews | ±30% from baseline | ±50% |
+| Bounce rate | ±15% from baseline | ±30% |
+
+**Severity levels:**
+
+- **Low** — metric crossed the alert threshold
+- **Medium** — metric is 1.3× the alert threshold
+- **High** — metric crossed the high severity threshold
+
+A 24-hour cooldown per metric prevents duplicate alerts for the same issue.
+
+## Viewing alerts
+
+Active alerts appear in two places:
+
+1. **Dashboard sidebar** — an unread badge appears on **Insights → Alerts** when new alerts are waiting
+2. **Alerts page** — full list of active and historical alerts with details: metric, direction (spike or drop), current value, baseline value, and percent change
+
+Alerts are kept for **30 days** on Pro and **90 days** on Scale.
+
+## Notification channels
+
+Configure channels per site under **Site Settings → Alerts**.
+
+### Email
+
+An HTML email with alert details — metric, severity, current value, baseline, and a link to your dashboard.
+
+### Slack
+
+Formatted Slack blocks with color-coded severity. Connect via webhook URL.
+
+### Discord
+
+Discord embeds with severity color indicators. Connect via webhook URL.
+
+### Webhook
+
+A `POST` request is sent to your endpoint with this JSON payload:
+
+```json
+{
+  "event_type": "anomaly_detected",
+  "site_id": "your-site-id",
+  "metric": "sessions",
+  "severity": "high",
+  "current_value": 1500,
+  "baseline_value": 800,
+  "percent_change": 87.5,
+  "direction": "spike",
+  "detected_at": "2025-03-28T06:00:00Z"
+}
+```
+
+### Metric filtering
+
+Each notification channel can be configured to only fire for specific metrics — for example, a Slack channel that only notifies on sessions changes, and a webhook that fires for everything.
+
+## Alert cooldowns
+
+Notifications have a per-channel cooldown of 60 minutes. If the same alert triggers multiple times within an hour, only one notification is sent. This prevents alert fatigue during sustained incidents.
+
+## MCP access
+
+Active alerts are accessible via the MCP integration using the `get_active_alerts` tool. This returns all unresolved alerts (status `new` or `seen`) for your site.

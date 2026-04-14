@@ -1,0 +1,46 @@
+---
+title: Weekly Reports
+description: Automatic Monday morning analytics summaries delivered to your inbox
+---
+
+Every Monday at midnight UTC, Eesee generates a plain-English email summary of the past 7 days for every site in your organization. No dashboards, no manual work.
+
+## What's in the report
+
+Each weekly report covers:
+
+- **Overview metrics** — total sessions, pageviews, unique visitors, bounce rate, and average session duration for the past 7 days
+- **Week-over-week comparison** — how each metric changed versus the previous 7-day period, with percentage deltas
+- **Top pages** — the 5 pages that drove the most sessions
+- **Top referrers** — the 5 sources that sent the most traffic
+- **Top countries** — where your visitors came from
+- **Device breakdown** — desktop vs. mobile vs. tablet split
+
+If you have multiple sites in your organization, each site gets its own section in the email.
+
+## Delivery
+
+- **Schedule**: Every Monday at 00:00 UTC
+- **Recipient**: Every member of your organization (who has access to the site)
+- **Format**: HTML email via Resend
+
+Reports respect your organization's member permissions — if a team member only has access to certain sites, they only receive summaries for those sites.
+
+## Opting out
+
+Weekly reports are on by default. To disable them for your account:
+
+1. Go to **Settings → Notifications**
+2. Toggle **Weekly email reports** off
+
+This only affects your account. Other organization members keep receiving their reports.
+
+## Accessing past reports in the dashboard
+
+Your reports are also stored and accessible directly in the dashboard:
+
+1. Open your site
+2. Go to **Insights → Reports**
+3. Browse or search past weekly, monthly, quarterly, and yearly reports
+
+You can also retrieve reports via the MCP integration using `get_latest_report` or `get_all_reports`.

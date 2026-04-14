@@ -1,0 +1,329 @@
+"use client";
+
+import { PricingCard } from "@/components/pricing/PricingCard";
+import { Slider } from "@/components/ui/slider";
+import { toast } from "@/components/ui/sonner";
+import { authClient } from "@/lib/auth";
+import { BACKEND_URL } from "@/lib/const";
+import { cn } from "@/lib/utils";
+import { useExtracted } from "next-intl";
+import { useEffect, useState } from "react";
+import { trackAdEvent } from "../../../lib/trackAdEvent";
+import {
+  EVENT_TIERS,
+  STARTER_FEATURES,
+  PRO_FEATURES,
+  SCALE_FEATURES,
+  isStarterAvailable,
+  findPriceForTier,
+  formatEventTier,
+} from "./utils";
+
+import { CheckoutModal } from "@/components/subscription/components/CheckoutModal";
+import { useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
+
+export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
+  const t = useExtracted();
+  const [siteId] = useQueryState("siteId");
+  const router = useRouter();
+
+  const [eventLimitIndex, setEventLimitIndex] = useState<number>(0);
+  const [isAnnual, setIsAnnual] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showTestPlan, setShowTestPlan] = useState(false);
+  const [checkoutClientSecret, setCheckoutClientSecret] = useState<string | null>(null);
+  const { data: activeOrg } = authClient.useActiveOrganization();
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "D" && e.shiftKey) {
+        setShowTestPlan((prev) => !prev);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const eventLimit = EVENT_TIERS[eventLimitIndex];
+
+  async function handleSubscribe(planType: "starter" | "pro" | "scale"): Promise<void> {
+    if (eventLimit === "Custom") {
+      window.location.href = "mailto:hello@eeseemetrics.com";
+      return;
+    }
+
+    if (!isLoggedIn) {
+      toast.error(t("Please log in to subscribe."));
+      return;
+    }
+
+    if (!activeOrg) {
+      toast.error(t("Please select an organization to subscribe."));
+      return;
+    }
+
+    const selectedTierPrice = findPriceForTier(eventLimit, isAnnual ? "year" : "month", planType);
+
+    if (!selectedTierPrice) {
+      toast.error(t("Selected pricing plan not found. Please adjust the slider."));
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const baseUrl = window.location.origin;
+      const returnUrl = siteId
+        ? `${baseUrl}/${siteId}?session_id={CHECKOUT_SESSION_ID}`
+        : `${baseUrl}/settings/organization/subscription?session_id={CHECKOUT_SESSION_ID}`;
+
+      const response = await fetch(`${BACKEND_URL}/stripe/create-checkout-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          priceId: selectedTierPrice.priceId,
+          returnUrl,
+          organizationId: activeOrg.id,
+          referral: window.Rewardful?.referral || undefined,
+          planType,
+        }),
+      });
+
+      const data = await response.json();
+      trackAdEvent("checkout", { tier: selectedTierPrice.name });
+
+      if (!response.ok) {
+        throw new Error(data.error || t("Failed to create checkout session."));
+      }
+
+      if (data.clientSecret) {
+        setCheckoutClientSecret(data.clientSecret);
+      } else {
+        throw new Error(t("Checkout session not received."));
+      }
+      setIsLoading(false);
+    } catch (error: any) {
+      toast.error(t("Subscription failed: {message}", { message: error.message }));
+      setIsLoading(false);
+    }
+  }
+
+  async function handleTestSubscribe(): Promise<void> {
+    if (!isLoggedIn) {
+      toast.error(t("Please log in to subscribe."));
+      return;
+    }
+    if (!activeOrg) {
+      toast.error(t("Please select an organization to subscribe."));
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const baseUrl = window.location.origin;
+      const returnUrl = siteId
+        ? `${baseUrl}/${siteId}?session_id={CHECKOUT_SESSION_ID}`
+        : `${baseUrl}/settings/organization/subscription?session_id={CHECKOUT_SESSION_ID}`;
+
+      const response = await fetch(`${BACKEND_URL}/stripe/create-checkout-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          priceId: "price_1SzT8pDFVprnAny2EdkqxRAZ",
+          returnUrl,
+          organizationId: activeOrg.id,
+          referral: window.Rewardful?.referral || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("Failed to create checkout session."));
+      }
+
+      if (data.clientSecret) {
+        setCheckoutClientSecret(data.clientSecret);
+      } else {
+        throw new Error(t("Checkout session not received."));
+      }
+      setIsLoading(false);
+    } catch (error: any) {
+      toast.error(t("Subscription failed: {message}", { message: error.message }));
+      setIsLoading(false);
+    }
+  }
+
+  function handleSliderChange(value: number[]): void {
+    setEventLimitIndex(value[0]);
+  }
+
+  const starterAvailable = isStarterAvailable(eventLimit);
+  const starterMonthlyPrice = findPriceForTier(eventLimit, "month", "starter")?.price || 0;
+  const starterAnnualPrice = findPriceForTier(eventLimit, "year", "starter")?.price || 0;
+  const proMonthlyPrice = findPriceForTier(eventLimit, "month", "pro")?.price || 0;
+  const proAnnualPrice = findPriceForTier(eventLimit, "year", "pro")?.price || 0;
+  const scaleMonthlyPrice = findPriceForTier(eventLimit, "month", "scale")?.price || 0;
+  const scaleAnnualPrice = findPriceForTier(eventLimit, "year", "scale")?.price || 0;
+  const isCustomTier = eventLimit === "Custom";
+
+  return (
+    <>
+      <CheckoutModal
+        clientSecret={checkoutClientSecret}
+        open={!!checkoutClientSecret}
+        onOpenChange={(open) => { if (!open) setCheckoutClientSecret(null); }}
+      />
+      <div className="max-w-[1300px] mx-auto">
+        {/* Shared controls section */}
+        <div className="max-w-xl mx-auto mb-8">
+          <div className="flex justify-between mb-6 items-center">
+            <div>
+              <h3 className="font-semibold mb-2">{t("Monthly pageviews")}</h3>
+              <div className="text-3xl font-bold text-accent-400">
+                {typeof eventLimit === "number" ? eventLimit.toLocaleString() : eventLimit}
+              </div>
+            </div>
+            <div className="flex flex-col items-end">
+              <div className="relative flex items-center">
+                <div className="flex bg-neutral-150 dark:bg-neutral-850 border border-neutral-250 dark:border-neutral-750 rounded-full p-1 text-sm">
+                  <button
+                    onClick={() => setIsAnnual(false)}
+                    className={cn(
+                      "px-3 py-1 rounded-full transition-colors cursor-pointer",
+                      !isAnnual
+                        ? "bg-white dark:bg-white/20 text-neutral-700 dark:text-neutral-100 font-medium"
+                        : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
+                    )}
+                  >
+                    {t("Monthly")}
+                  </button>
+                  <button
+                    onClick={() => setIsAnnual(true)}
+                    className={cn(
+                      "px-3 py-1 rounded-full transition-colors cursor-pointer",
+                      isAnnual
+                        ? "bg-white dark:bg-white/20 text-neutral-700 dark:text-neutral-100 font-medium"
+                        : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
+                    )}
+                  >
+                    {t("Annual")}
+                  </button>
+                </div>
+                <span className="absolute -top-3 -right-12 text-xs text-white bg-accent-500 border border-accent-500 rounded-full px-2 py-0.5 whitespace-nowrap">
+                  {t("33% off")}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Slider */}
+          <Slider
+            defaultValue={[0]}
+            max={EVENT_TIERS.length - 1}
+            min={0}
+            step={1}
+            onValueChange={handleSliderChange}
+            className="mb-3"
+          />
+
+          <div className="flex justify-between text-xs text-neutral-600 dark:text-neutral-400">
+            {EVENT_TIERS.map((tier, index) => (
+              <span
+                key={index}
+                className={cn(eventLimitIndex === index && "font-bold text-accent-600 dark:text-accent-400")}
+              >
+                {index === EVENT_TIERS.length - 1 && typeof tier !== "number"
+                  ? "20M+"
+                  : formatEventTier(tier)}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Cards */}
+        <div className="grid min-[1100px]:grid-cols-3 min-[700px]:grid-cols-2 min-[400px]:grid-cols-1 gap-4 mx-auto mb-16">
+
+          {/* Starter */}
+          <div className={cn("h-full", !starterAvailable && "opacity-60")}>
+            <PricingCard
+              title="Starter"
+              description={t("For personal projects and small sites")}
+              monthlyPrice={starterMonthlyPrice}
+              annualPrice={starterAnnualPrice}
+              isAnnual={isAnnual}
+              isCustomTier={!starterAvailable}
+              customPriceLabel="—"
+              buttonText={
+                !starterAvailable
+                  ? t("Up to 250k pageviews only")
+                  : isLoading
+                    ? t("Processing...")
+                    : t("Start 7-day trial")
+              }
+              features={STARTER_FEATURES}
+              onClick={() => handleSubscribe("starter")}
+              disabled={isLoading || !starterAvailable}
+            />
+          </div>
+
+          {/* Pro — recommended */}
+          <PricingCard
+            title="Pro"
+            description={t("AI insights + anomaly alerts for growing teams")}
+            monthlyPrice={proMonthlyPrice}
+            annualPrice={proAnnualPrice}
+            isAnnual={isAnnual}
+            isCustomTier={isCustomTier}
+            buttonText={
+              isLoading
+                ? t("Processing...")
+                : isCustomTier
+                  ? t("Contact us")
+                  : t("Start 14-day trial")
+            }
+            features={PRO_FEATURES}
+            recommended={true}
+            onClick={() => handleSubscribe("pro")}
+            disabled={isLoading}
+          />
+
+          {/* Scale */}
+          <PricingCard
+            title="Scale"
+            description={t("Full AI suite, email reports, and unlimited access")}
+            monthlyPrice={scaleMonthlyPrice}
+            annualPrice={scaleAnnualPrice}
+            isAnnual={isAnnual}
+            isCustomTier={isCustomTier}
+            buttonText={
+              isLoading
+                ? t("Processing...")
+                : isCustomTier
+                  ? t("Contact us")
+                  : t("Start 21-day trial")
+            }
+            features={SCALE_FEATURES}
+            onClick={() => handleSubscribe("scale")}
+            disabled={isLoading}
+          />
+
+          {/* Hidden test plan (Shift+D) */}
+          {showTestPlan && (
+            <PricingCard
+              title="Test"
+              description={t("$1 test subscription for development")}
+              isCustomTier={isCustomTier}
+              buttonText={isLoading ? t("Processing...") : t("Subscribe ($1)")}
+              features={["Test plan"]}
+              onClick={() => handleTestSubscribe()}
+              disabled={isLoading}
+            />
+          )}
+        </div>
+      </div>
+    </>
+  );
+}

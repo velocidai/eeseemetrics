@@ -1,0 +1,43 @@
+# Eesee Metrics
+
+> Privacy-first web analytics with AI reports, anomaly detection, and MCP server support.
+
+Eesee Metrics is a cookieless, GDPR-compliant web analytics platform. It tracks sessions, pageviews, funnels, user journeys, retention cohorts, and JavaScript errors without storing personal data or using cookies. It generates automated AI reports (weekly/monthly/quarterly/yearly) and exposes analytics data via an MCP server (21 tools) for use in Claude, Cursor, and other AI assistants. Available as a managed cloud service or self-hosted via Docker (AGPL-3.0, open source).
+
+## Key pages
+
+- [Home](https://eeseemetrics.com): Product overview and signup
+- [Pricing](https://eeseemetrics.com/pricing): Starter from $14/mo, Pro from $19/mo, Scale from $39/mo
+- [Documentation](https://eeseemetrics.com/docs): Full setup and API guides
+- [Blog](https://eeseemetrics.com/blog): Privacy analytics articles and updates
+- [Compare](https://eeseemetrics.com/compare): Side-by-side comparisons with GA4, Plausible, Fathom, Matomo, Umami, PostHog
+- [GitHub](https://github.com/velocidai/eeseemetrics): Open source repository (AGPL-3.0)
+
+## Features
+
+- Cookieless tracking — no cookies, no consent banner required in most jurisdictions
+- GDPR, CCPA, and PECR compliant by design
+- Real-time dashboards: sessions, pageviews, bounce rate, session duration
+- Session replay, funnels, user journeys (Sankey), retention cohorts
+- JavaScript error tracking and Web Vitals monitoring
+- Google Search Console integration
+- AI-powered weekly/monthly/quarterly/yearly analytics reports
+- Anomaly detection with email, Slack, and Discord alerts
+- MCP server: 21 tools for Claude, Cursor, and any MCP-compatible AI assistant
+- Uptime monitoring (HTTP and TCP) with multi-region support
+- Self-hostable via Docker, open source under AGPL-3.0
+
+## Plans
+
+- Starter: from $14/mo — core analytics, goals, uptime monitoring (5 monitors), 1 site
+- Pro: from $19/mo — everything in Starter plus sessions, funnels, journeys, retention, session replay, AI reports, anomaly alerts, MCP (21 tools), Google Search Console, 5 sites
+- Scale: from $39/mo — everything in Pro plus unlimited sites and team members, all AI report cadences, 50 uptime monitors, 5-year data retention, priority support
+
+## Company
+
+- Website: https://eeseemetrics.com
+- App: https://app.eeseemetrics.com
+- GitHub: https://github.com/velocidai/eeseemetrics
+- Contact: hello@eeseemetrics.com
+- Hosting: Hetzner, Germany (EU)
+- License: AGPL-3.0

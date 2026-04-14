@@ -1,0 +1,138 @@
+---
+title: Architecture
+description: How Eesee Metrics is built and how your data flows through the platform
+---
+
+## Overview
+
+Eesee Metrics is a fully managed, cloud-hosted analytics platform. You add our tracking script to your site — we handle everything else: data ingestion, storage, querying, session replay storage, and AI analysis.
+
+## System Architecture
+
+<Mermaid
+  chart="
+graph TB
+    subgraph Your Website
+        A[Tracked Page]
+    end
+
+    subgraph Eesee Metrics Cloud
+        B[Caddy Reverse Proxy<br/>HTTP/3 + TLS]
+        subgraph Backend
+            C[Fastify API Server]
+            D[Better Auth]
+            E[MaxMind GeoIP]
+        end
+        F[(PostgreSQL<br/>Users & Sites)]
+        G[(ClickHouse<br/>Events & Analytics)]
+    end
+
+    subgraph External Services
+        H[Cloudflare R2<br/>Session Replays]
+        I[Resend<br/>Email & Reports]
+    end
+
+    A -->|script.js events| B
+    B --> C
+    C --> D
+    C --> F
+    C --> G
+    C -->|Store replays| H
+    C -->|Reports & alerts| I
+    C --> E
+"
+/>
+
+## Core Components
+
+### Tracking Script
+
+A small JavaScript snippet (`~18 KB` uncompressed) added to your site. It:
+
+- Tracks pageviews automatically, including SPA route changes
+- Captures custom events via the `track()` API
+- Optionally records session replays
+- Collects Web Vitals and JavaScript errors
+- Tracks outbound link clicks
+
+Install via script tag or npm:
+
+```html
+<script src="https://app.eeseemetrics.com/api/script.js" data-site-id="YOUR_SITE_ID" async></script>
+```
+
+```bash
+npm install @eesee/js
+```
+
+### API Server
+
+Built on **Fastify** with TypeScript. Handles:
+
+- Event ingestion at `/api/track`
+- Dashboard API queries
+- Authentication via Better Auth
+- Rate limiting per API key and IP
+- Bot detection using isbot
+- Geolocation via MaxMind GeoIP
+
+### Data Layer
+
+| Store | Purpose |
+|---|---|
+| **ClickHouse** | Analytics events — fast aggregation queries at any scale |
+| **PostgreSQL** | Users, sites, organizations, sessions, settings |
+| **Cloudflare R2** | Session replay recordings (object storage) |
+
+### Reports & Alerts Layer
+
+Runs as a scheduled background service:
+
+- **Weekly reports** — reads ClickHouse data, generates a plain-English summary, sends via Resend
+- **Anomaly alerts** — monitors rolling baselines and flags deviations above configurable thresholds
+- **MCP server** — exposes your analytics data to AI tools via the Model Context Protocol
+
+## Data Flow
+
+### Event Ingestion
+
+```
+1. User action on your website
+2. Tracking script sends POST to /api/track
+3. Payload validated with Zod
+4. Bot detection check
+5. Rate limit check
+6. Monthly event limit check
+7. IP geolocation lookup (MaxMind)
+8. Session updated in PostgreSQL
+9. Event written to ClickHouse
+10. Real-time update broadcast
+```
+
+### Dashboard Query
+
+```
+1. Dashboard sends API request
+2. Better Auth validates session
+3. Site ownership check
+4. Filter conditions built
+5. ClickHouse query executed
+6. Results aggregated and formatted
+7. Response returned to UI
+```
+
+## Security & Privacy
+
+| Property | Implementation |
+|---|---|
+| **No cookies** | Users identified via salted IP + User-Agent hash |
+| **Daily rotating salt** | Prevents long-term fingerprinting |
+| **No personal data** | IPs are never stored |
+| **IP exclusion** | Filter your own traffic |
+| **Bot blocking** | isbot integration, automatic |
+| **Rate limiting** | Per API key and IP |
+| **GDPR / CCPA** | Compliant by design — no consent banner required |
+
+## Infrastructure
+
+Eesee Metrics is hosted on **Hetzner** infrastructure in the **European Union**, ensuring GDPR-compliant data residency. Session replays are stored on Cloudflare R2 with EU-region configuration.

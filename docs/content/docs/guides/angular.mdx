@@ -1,0 +1,132 @@
+---
+title: Angular
+description: Integrate eesee Analytics with your Angular application
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+
+This guide explains how to integrate eesee with your Angular application.
+
+## How to Add eesee to Your Angular App
+
+The recommended and most common method is to add the eesee tracking script directly to your `src/index.html` file. This ensures the script is loaded early and reliably for your Angular application.
+
+### Adding to `src/index.html`
+
+<Steps>
+<Step>
+### Retrieve Your Tracking Script
+
+Navigate to your eesee dashboard to obtain your code snippet. It will look like this:
+
+```html
+<script
+  src="https://app.eeseemetrics.com/api/script.js"
+  data-site-id="YOUR_SITE_ID"
+  defer
+></script>
+```
+Remember to replace `YOUR_SITE_ID` with your actual Site ID.
+</Step>
+
+<Step>
+### Locate Your `index.html` File
+
+In a standard Angular CLI project, this file is typically located at `src/index.html`.
+</Step>
+
+<Step>
+### Add the Snippet to `index.html`
+
+Open `src/index.html` and paste the eesee tracking snippet just before the closing `</head>` tag or `</body>` tag. Placing it in the `<head>` is generally preferred for earlier loading.
+
+```html filename="src/index.html"
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>MyAngularApp</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- eesee Tracking Snippet -->
+  <script
+    src="https://app.eeseemetrics.com/api/script.js"
+    data-site-id="YOUR_SITE_ID"
+    defer
+  ></script>
+</head>
+<body>
+  <app-root></app-root> <!-- Your root Angular component -->
+  <!-- If you prefer, you can also place the script here, before </body> -->
+</body>
+</html>
+```
+Make sure to replace `YOUR_SITE_ID` with your actual Site ID.
+</Step>
+
+<Step>
+### Verify Installation
+
+After building and deploying your application, open your eesee dashboard to check if data is being received. You can also inspect your browser's network tab to confirm that `script.js` is loaded.
+</Step>
+</Steps>
+
+<Callout type="info">
+  **SPA Page View Tracking**: eesee's tracking script is designed to automatically detect route changes in most Angular applications (using Angular Router) and track them as page views. If you find that page views are not being tracked correctly after navigation, you might need to manually trigger page views. You can subscribe to router events:
+  ```typescript
+  // In a relevant component or service
+  import { Router, NavigationEnd } from '@angular/router';
+  import { filter } from 'rxjs/operators';
+
+  // ...
+  // constructor(private router: Router) {}
+  // ...
+
+  // this.router.events.pipe(
+  //   filter(event => event instanceof NavigationEnd)
+  // ).subscribe(() => {
+  //   if (window.eesee) {
+  //     window.eesee.pageview();
+  //   }
+  // });
+  ```
+  However, test the default behavior first, as manual tracking might not be necessary.
+</Callout>
+
+## Custom Event Tracking
+
+Once the eesee script is installed and loaded, you can track custom events from any of your Angular components or services:
+
+```typescript
+// Example in an Angular component
+import { Component } from '@angular/core';
+
+// Declare eesee on window for TypeScript
+declare global {
+  interface Window {
+    eesee?: {
+      event: (eventName: string, eventData?: Record<string, any>) => void;
+      pageview: () => void;
+      // Add other methods if you use them
+    };
+  }
+}
+
+@Component({
+  selector: 'app-my-feature',
+  template: `<button (click)="onFeatureClick()">Use Feature</button>`,
+})
+export class MyFeatureComponent {
+  onFeatureClick(): void {
+    if (window.eesee && typeof window.eesee.event === 'function') {
+      window.eesee.event('feature_used', { featureName: 'Amazing Feature' });
+    } else {
+      console.warn('eesee tracking not available.');
+    }
+  }
+}
+```
+Declaring `window.eesee` helps with TypeScript type checking. Always ensure `window.eesee` and its methods are available before calling them.

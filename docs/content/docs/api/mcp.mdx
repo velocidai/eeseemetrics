@@ -1,0 +1,140 @@
+---
+title: MCP Integration
+description: Connect your Eesee Metrics analytics data to Claude, Cursor, and other AI tools
+---
+
+The Eesee Metrics MCP server lets you query your analytics data directly from AI tools that support the [Model Context Protocol](https://modelcontextprotocol.io). Ask questions like "what were my top pages last week?" or "are there any active anomaly alerts?" without leaving your editor or chat.
+
+## Requirements
+
+- **Plan**: Pro or Scale
+- **MCP token**: generated from your dashboard (Settings → API Keys)
+
+## Generating an MCP token
+
+1. Go to **Settings → API Keys** in your dashboard
+2. Click **Create API Key**
+3. Select **MCP** as the token type
+4. Choose the site you want to connect
+5. Copy the token — you won't be able to see it again
+
+Each MCP token is scoped to a single site.
+
+## Connection
+
+**Endpoint:** `https://app.eeseemetrics.com/api/mcp`
+**Transport:** Streamable HTTP (MCP spec 2024-11-05)
+**Authentication:** `Authorization: Bearer YOUR_MCP_TOKEN`
+
+### Claude Desktop
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "eesee-metrics": {
+      "type": "http",
+      "url": "https://app.eeseemetrics.com/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_MCP_TOKEN"
+      }
+    }
+  }
+}
+```
+
+On macOS the config file is at `~/Library/Application Support/Claude/claude_desktop_config.json`.
+On Windows it's at `%APPDATA%\Claude\claude_desktop_config.json`.
+
+### Cursor
+
+Add to `.cursor/mcp.json` in your project root (or `~/.cursor/mcp.json` for global):
+
+```json
+{
+  "mcpServers": {
+    "eesee-metrics": {
+      "url": "https://app.eeseemetrics.com/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_MCP_TOKEN"
+      }
+    }
+  }
+}
+```
+
+### Claude Code (CLI)
+
+```bash
+claude mcp add eesee-metrics \
+  --transport http \
+  --url https://app.eeseemetrics.com/api/mcp \
+  --header "Authorization: Bearer YOUR_MCP_TOKEN"
+```
+
+### Other MCP clients
+
+Use the streamable HTTP transport with:
+- URL: `https://app.eeseemetrics.com/api/mcp`
+- Header: `Authorization: Bearer YOUR_MCP_TOKEN`
+
+## Rate limits
+
+| Plan | Requests per minute |
+|---|---|
+| Pro | 60 |
+| Scale | 200 |
+
+## Available tools
+
+### Pro + Scale
+
+| Tool | Description |
+|---|---|
+| `get_overview` | Sessions, pageviews, unique visitors, bounce rate, avg session duration |
+| `get_top_pages` | Top pages by session count (up to 50) |
+| `get_top_referrers` | Top referring domains |
+| `get_top_countries` | Traffic breakdown by country |
+| `get_top_devices` | Device type breakdown (desktop / mobile / tablet) |
+| `get_goals` | Goal conversion counts and rates |
+| `get_campaigns` | Campaign performance metrics (UTM) |
+| `get_performance` | Core Web Vitals — LCP, CLS, INP at p50/p75 with ratings |
+| `get_active_alerts` | All unresolved anomaly alerts |
+| `get_latest_report` | Latest AI report (weekly, monthly, quarterly, or yearly) |
+
+### Scale only
+
+| Tool | Description |
+|---|---|
+| `get_retention` | Cohort retention data |
+| `get_funnels` | Funnel conversion rates |
+| `get_errors` | JavaScript error log |
+| `get_sessions` | Recent user sessions with entry page, country, device, duration |
+| `get_compare_periods` | Side-by-side metric comparison between two time periods |
+| `get_all_reports` | List of all available AI reports |
+| `get_gsc_data` | Google Search Console data (requires GSC integration) |
+
+## Tool parameters
+
+Most tools accept optional `start_date` and `end_date` parameters in `YYYY-MM-DD` format. When omitted, tools default to the last 7 days.
+
+```
+get_overview(start_date: "2025-03-01", end_date: "2025-03-28")
+get_top_pages(limit: 20, start_date: "2025-03-01")
+get_latest_report(cadence: "monthly")
+get_sessions(limit: 10)
+```
+
+## Example usage
+
+Once connected, you can ask your AI assistant things like:
+
+- "What are my top 10 pages this month?"
+- "Are there any active anomaly alerts on my site?"
+- "Compare this week's sessions to last week's"
+- "What's my bounce rate trend and are there any Core Web Vitals issues?"
+- "Give me the latest weekly report summary"
+- "Which countries are driving the most traffic?"
+
+The AI tool will call the appropriate MCP tools and synthesize the results into a plain-English response.

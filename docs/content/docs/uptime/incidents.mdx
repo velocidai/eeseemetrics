@@ -1,0 +1,61 @@
+---
+title: Incidents
+description: Track and manage downtime events
+---
+
+An incident is created automatically when a monitor transitions from up to down. It stays open until the monitor recovers, at which point it's resolved with the total downtime duration recorded.
+
+## Incident lifecycle
+
+```
+Monitor check fails → Incident opened → [acknowledged] → Monitor recovers → Incident resolved
+```
+
+1. **Opened** — the monitor failed a check. Notification channels fire immediately.
+2. **Acknowledged** *(optional)* — a team member acknowledges the incident to signal someone is investigating.
+3. **Resolved** — the monitor passes a check again. The incident is closed with start time, end time, and duration recorded.
+
+## Viewing incidents
+
+Go to **Monitoring → Incidents** (per-site) or **Uptime → Incidents** (org-wide) to see the full list.
+
+Each incident row shows:
+- **Monitor name and URL**
+- **Start time** — when the first failing check was recorded
+- **End time** — when the monitor recovered (blank if still open)
+- **Duration** — total downtime
+- **Status** — open, acknowledged, or resolved
+- **Error** — the specific failure reason (e.g. connection refused, timeout, HTTP 503, validation rule failed)
+
+Click any incident to view the full detail including the sequence of check events during the outage.
+
+## Acknowledging an incident
+
+Acknowledging signals to your team that someone is aware and investigating. It does not resolve the incident — the monitor must recover for that to happen automatically.
+
+To acknowledge:
+
+1. Open the incident
+2. Click **Acknowledge**
+
+Or from the incident list, click the **⋮** menu → **Acknowledge**.
+
+## Active vs. resolved incidents
+
+- **Active** — the monitor is currently down; the incident is still open
+- **Resolved** — the monitor has recovered; the incident is closed
+
+The **Incidents** page defaults to showing active incidents. Use the filter to view resolved incidents or all incidents.
+
+## Notifications
+
+Notifications fire on two events:
+
+- **Incident opened** — when a monitor first goes down
+- **Incident resolved** — when the monitor recovers
+
+Both events use the same notification channels. Configure channels under **Settings → Notifications → Uptime Alert Channels**. See [Notifications](/docs/uptime/notifications) for setup.
+
+## Incident history retention
+
+All incidents are retained indefinitely. Use the date filter on the Incidents page to browse historical data.

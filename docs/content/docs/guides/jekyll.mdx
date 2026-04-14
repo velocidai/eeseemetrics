@@ -1,0 +1,146 @@
+---
+title: Jekyll
+description: Integrate eesee Analytics with your Jekyll static site using layout files or includes
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+Integrating eesee Analytics with your Jekyll static site involves adding the tracking script to your site's main layout file or by creating an include file.
+
+<Steps>
+<Step>
+### Get Your Tracking Script
+
+First, you'll need your eesee tracking script. You can find this in your eesee dashboard under **Site Settings > Tracking Code**. It will look something like this:
+
+```html
+<script async defer src="https://app.eeseemetrics.com/api/script.js" data-site-id="YOUR_SITE_ID"></script>
+```
+
+Replace `YOUR_SITE_ID` with your actual Site ID from your eesee dashboard.
+</Step>
+</Steps>
+
+## Option A: Add to Default Layout
+
+The simplest way is to add the script directly to your default layout file.
+
+<Steps>
+<Step>
+### Locate your main layout file
+
+In your Jekyll project, find your main layout file. This is often `_layouts/default.html`.
+</Step>
+
+<Step>
+### Add the tracking script
+
+Open this file and paste the eesee tracking script just before the closing `</body>` tag.
+
+```html
+{{ site.title }}
+{{ content }}
+<!-- Other footer content -->
+
+<!-- eesee Analytics Script -->
+{% raw %}
+{% if jekyll.environment == "production" %}
+  <script async defer src="https://app.eeseemetrics.com/api/script.js" data-site-id="YOUR_SITE_ID"></script>
+{% endif %}
+{% endraw %}
+
+</body>
+</html>
+```
+
+**Explanation:**
+- `{% raw %}{% if jekyll.environment == "production" %}{% endraw %}`: This Liquid tag condition ensures the script is only included when your site is built for production (e.g., when `JEKYLL_ENV=production jekyll build`). This prevents tracking your local development views.
+- Replace `YOUR_SITE_ID` with your actual Site ID. The script source `https://app.eeseemetrics.com/api/script.js` is for the standard cloud-hosted eesee instance.
+</Step>
+</Steps>
+
+## Option B: Create an Include File (Recommended)
+
+A cleaner approach is to create an include file for the script.
+
+<Steps>
+<Step>
+### Create the Include File
+
+- In your Jekyll project, navigate to the `_includes/` directory. If it doesn't exist, create it.
+- Create a new file named `eesee-analytics.html` (or similar) inside `_includes/`.
+- Paste the following into `_includes/eesee-analytics.html`:
+
+```html
+{% raw %}
+{% comment %} _includes/eesee-analytics.html {% endcomment %}
+{% if jekyll.environment == "production" and site.eesee_site_id %}
+  <script async defer src="{{ site.eesee_instance_url | default: 'https://app.eeseemetrics.com' }}/api/script.js" data-site-id="{{ site.eesee_site_id }}"></script>
+{% endif %}
+{% endraw %}
+```
+</Step>
+
+<Step>
+### Include in Layout
+
+- Open your main layout file (e.g., `_layouts/default.html`).
+- Just before the closing `</body>` tag, add:
+
+```html
+{{ site.title }}
+{{ content }}
+<!-- Other footer content -->
+
+{% raw %}{% include eesee-analytics.html %}{% endraw %}
+
+</body>
+</html>
+```
+</Step>
+
+<Step>
+### Configure `_config.yml`
+
+- Open your `_config.yml` file and add your eesee details:
+
+```yaml
+# eesee Analytics Configuration
+eesee_instance_url: "https://app.eeseemetrics.com" # Optional, defaults in include
+eesee_site_id: "YOUR_SITE_ID"
+```
+This method keeps your credentials in the configuration file and makes the script inclusion conditional on `eesee_site_id` being set.
+</Step>
+</Steps>
+
+## Build and Deploy
+
+<Steps>
+<Step>
+### Build your Jekyll site
+
+Build your Jekyll site. For production, set the `JEKYLL_ENV` environment variable:
+
+```bash
+JEKYLL_ENV=production jekyll build
+```
+
+Or, if you use GitHub Pages, it typically sets `jekyll.environment` to `production` automatically during its build process.
+</Step>
+
+<Step>
+### Deploy
+
+Deploy the generated `_site/` directory to your web server.
+</Step>
+
+<Step>
+### Verify Integration
+
+- Open your live Jekyll website in a browser.
+- Navigate through a few pages.
+- Check your eesee dashboard for incoming data. It might take a few minutes for the first events to appear.
+</Step>
+</Steps>
+
+That's it! eesee Analytics is now integrated with your Jekyll site and will only track visits on your production deployment.

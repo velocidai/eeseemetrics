@@ -1,0 +1,13 @@
+{
+  "name": "eesee-metrics",
+  "private": true,
+  "scripts": {
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  },
+  "dependencies": {
+    "nanoid": "^5.1.7"
+  }
+}

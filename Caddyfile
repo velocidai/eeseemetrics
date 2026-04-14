@@ -1,0 +1,29 @@
+# Caddyfile
+{$DOMAIN_NAME} {
+    # Enable compression
+    encode zstd gzip
+
+    request_body max_size 10MB
+    handle /api/* {
+        reverse_proxy backend:3001 {
+            header_up Host {host}
+            header_up X-Forwarded-Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Proxy all other requests to the client service
+    # header_up Host and X-Forwarded-Host are required to prevent
+    # Next.js RSC payload fetch failures behind a reverse proxy
+    handle {
+        reverse_proxy client:3002 {
+            header_up Host {host}
+            header_up X-Forwarded-Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+}

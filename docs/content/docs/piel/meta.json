@@ -1,0 +1,4 @@
+{
+  "title": "Reports & Alerts",
+  "pages": ["index", "ai-reports", "weekly-reports", "anomaly-alerts"]
+}
