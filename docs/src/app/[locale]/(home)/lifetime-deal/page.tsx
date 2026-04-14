@@ -1,19 +1,15 @@
 import type { Metadata } from "next";
 import {
   Activity,
-  Bell,
   Bot,
-  BrainCircuit,
   Check,
   Database,
   ExternalLink,
   Github,
   Globe2,
   Lock,
-  Mail,
   RefreshCw,
   ShieldCheck,
-  Star,
   Target,
   Wifi,
   Zap,
@@ -22,6 +18,7 @@ import { BackgroundGrid } from "@/components/BackgroundGrid";
 import { LTD_CONFIG } from "@/lib/ltd-config";
 import { CountdownTimer } from "./components/CountdownTimer";
 import { LtdFaq } from "./components/LtdFaq";
+import { LtdUpgradeSection } from "./components/LtdUpgradeSection";
 
 export const metadata: Metadata = {
   title: "eesee metrics Lifetime Deal — Privacy-First Web Analytics, Pay Once",
@@ -113,19 +110,9 @@ const STARTER_FEATURES = [
     title: "No cookies, no consent banners",
     desc: "Cookieless by design. GDPR and CCPA compliant out of the box.",
   },
-  {
-    icon: <Mail className="w-5 h-5" />,
-    title: "Email support",
-    desc: "Real humans. We actually reply.",
-  },
-  {
-    icon: <Star className="w-5 h-5" />,
-    title: "All future Starter updates",
-    desc: "As we improve the Starter plan, your deal gets better too.",
-  },
 ];
 
-const PLAN_FEATURES = ["Real-time analytics dashboard", "Goals & custom events", "Uptime monitoring (5 monitors)", "Bot filtering", "Data export", "2-year data retention", "One-line setup", "No cookies, no consent banners", "Email support", "All future Starter updates"];
+const PLAN_FEATURES = ["Real-time analytics dashboard", "Goals & custom events", "Uptime monitoring (5 monitors)", "Bot filtering", "Data export", "2-year data retention", "One-line setup", "No cookies, no consent banners"];
 
 const COMPARISON_ROWS = [
   ["Price",                    "$49 once",        "Free*",                        "$19/mo ($228/yr)",  "$15/mo ($180/yr)"],
@@ -260,15 +247,6 @@ export default async function LtdPage() {
             ))}
           </div>
 
-          <div className="bg-[#2FC7B8]/5 border border-[#2FC7B8]/20 rounded-lg p-5 text-center">
-            <p className="text-sm text-neutral-600 dark:text-neutral-300">
-              <span className="font-semibold text-[#2FC7B8]">
-                All future Starter updates included.
-              </span>{" "}
-              As we ship improvements to the Starter plan, your lifetime deal gets
-              better too — at no extra cost, forever.
-            </p>
-          </div>
         </div>
       </section>
 
@@ -472,87 +450,17 @@ export default async function LtdPage() {
       </section>
 
       {/* ── UPGRADE SECTION ────────────────────────────────────────────────── */}
-      <section className="py-12 md:py-16 w-full relative z-10">
-        <div className="max-w-[1200px] mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-              Need funnels, session replay, or AI reports?
-            </h2>
-            <p className="text-neutral-600 dark:text-neutral-400 text-lg">
-              Your lifetime Starter plan stays free forever. Upgrade anytime —
-              your LTD remains your permanent safety net if you ever cancel.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {[
-              {
-                name: "Pro",
-                price: "$19/mo",
-                annual: "$13/mo billed annually",
-                features: [
-                  "Everything in Starter",
-                  "Sessions, funnels & journeys",
-                  "User profiles & retention",
-                  "Web vitals & error tracking",
-                  "Google Search Console",
-                  "Session replay",
-                  "AI reports (weekly)",
-                  "Anomaly detection & alerts",
-                  "Full MCP toolset (21 tools)",
-                  "Uptime monitoring (10 monitors)",
-                  "Up to 5 websites, 3 team members",
-                  "3-year data retention",
-                ],
-              },
-              {
-                name: "Scale",
-                price: "$39/mo",
-                annual: "$26/mo billed annually",
-                features: [
-                  "Everything in Pro",
-                  "AI reports (all cadences)",
-                  "Higher MCP rate limits",
-                  "Unlimited websites & team members",
-                  "5-year data retention",
-                  "Uptime monitoring (50 monitors)",
-                  "Priority support",
-                ],
-              },
-            ].map((plan) => (
-              <div
-                key={plan.name}
-                className="bg-neutral-100/50 dark:bg-neutral-800/20 border border-neutral-300/50 dark:border-neutral-800/50 rounded-xl p-6"
-              >
-                <h3 className="text-xl font-bold mb-0.5">{plan.name}</h3>
-                <p className="text-2xl font-bold text-[#2FC7B8] mb-0.5">
-                  {plan.price}
-                </p>
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
-                  {plan.annual}
-                </p>
-                <ul className="space-y-2">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <Check className="w-4 h-4 text-[#2FC7B8] mt-0.5 shrink-0" />
-                      <span className="text-neutral-700 dark:text-neutral-300">
-                        {f}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 max-w-2xl mx-auto">
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 bg-neutral-100/50 dark:bg-neutral-800/20 border border-neutral-300/50 dark:border-neutral-800/50 rounded-lg px-6 py-4 text-center">
-              Upgrade to Pro or Scale at regular pricing — your lifetime deal is
-              paused, not deleted. Cancel anytime and you automatically return to
-              your Starter LTD at $0/month. You'll always have eesee.
-            </p>
-          </div>
+      <section className="w-full relative z-10">
+        <div className="max-w-[1200px] mx-auto px-4 pt-12 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+            Need funnels, session replay, or AI reports?
+          </h2>
+          <p className="text-neutral-600 dark:text-neutral-400 text-lg mb-2">
+            Your lifetime Starter plan stays free forever. Upgrade anytime —
+            your LTD remains your permanent safety net if you ever cancel.
+          </p>
         </div>
+        <LtdUpgradeSection />
       </section>
 
       {/* ── SOCIAL PROOF ───────────────────────────────────────────────────── */}
@@ -617,35 +525,6 @@ export default async function LtdPage() {
             ))}
           </div>
 
-          {/* Testimonial placeholders */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="bg-neutral-100/30 dark:bg-neutral-800/10 border border-dashed border-neutral-300/40 dark:border-neutral-700/40 rounded-xl p-6 opacity-50"
-              >
-                <div className="flex gap-1 mb-3">
-                  {Array.from({ length: 5 }).map((_, j) => (
-                    <Star
-                      key={j}
-                      className="w-4 h-4 fill-amber-400 text-amber-400"
-                    />
-                  ))}
-                </div>
-                <p className="text-sm text-neutral-500 italic mb-4">
-                  Customer reviews will appear here.
-                </p>
-                <p className="text-xs font-medium text-neutral-500">
-                  — Name, Role
-                </p>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-xs text-neutral-500 mt-4">
-            Reviews added as they come in.{" "}
-            <span className="text-[#2FC7B8]">30-day money-back guarantee</span> —
-            zero risk.
-          </p>
         </div>
       </section>
 
