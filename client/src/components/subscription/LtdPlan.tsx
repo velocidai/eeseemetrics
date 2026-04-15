@@ -1,4 +1,4 @@
-import { Infinity, ArrowRight } from "lucide-react";
+import { Infinity as InfinityIcon, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -42,7 +42,7 @@ export function LtdPlan() {
                   {TIER_LABELS[tier]} · Paid once
                 </p>
                 <p className="text-neutral-400 text-sm flex items-center gap-1">
-                  <Infinity className="w-3.5 h-3.5" /> Never expires · No recurring charges
+                  <InfinityIcon className="w-3.5 h-3.5" /> Never expires · No recurring charges
                 </p>
               </div>
               <Button variant="success" onClick={() => router.push("/subscribe")}>
