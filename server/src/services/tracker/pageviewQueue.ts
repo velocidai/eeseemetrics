@@ -82,6 +82,8 @@ class PageviewQueue {
         country: countryCode,
         region: countryCode && regionCode ? countryCode + "-" + regionCode : "",
         city: city || "",
+        lat: dataForIp?.latitude ?? 0,
+        lon: dataForIp?.longitude ?? 0,
         type: pv.type || "pageview",
         event_name: pv.event_name || "",
         props: getParsedProperties(pv.properties),

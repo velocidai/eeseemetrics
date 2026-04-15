@@ -31,7 +31,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </TooltipProvider>
       </ThemeProvider>
       {appEnv === "prod" && (
-        <Script src="https://app.eeseemetrics.com/api/script.js" data-site-id="21" strategy="afterInteractive" />
+        <Script src="https://app.eeseemetrics.com/api/script.js" data-site-id="1" strategy="afterInteractive" />
       )}
       {appEnv === "prod" && IS_CLOUD && (
         <>
