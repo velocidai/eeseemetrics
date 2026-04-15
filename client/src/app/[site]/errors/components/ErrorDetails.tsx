@@ -242,8 +242,8 @@ export function ErrorDetails({ errorMessage }: ErrorDetailsProps) {
                 </div>
               </div>
 
-              {/* Stack trace section (randomly show/hide) */}
-              {Math.random() > 0.5 && (
+              {/* Stack trace section */}
+              {(
                 <div className="mt-3 pt-3 border-t border-neutral-100 dark:border-neutral-850">
                   <div className="flex items-start gap-2">
                     <Skeleton className="h-4 w-4 mt-0.5" /> {/* Code icon */}

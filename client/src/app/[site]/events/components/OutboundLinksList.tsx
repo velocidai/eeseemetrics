@@ -10,25 +10,17 @@ import { Favicon } from "../../../../components/Favicon";
 import { cn, truncateUrl } from "../../../../lib/utils";
 import { ScrollArea } from "../../../../components/ui/scroll-area";
 
+// Deterministic widths — avoids Math.random() during render which would cause
+// React hydration mismatches (server/client values differ).
+const OUTBOUND_WIDTHS = [100, 70, 40, 33, 28, 23, 18, 16, 14, 11];
+const OUTBOUND_LABEL_WIDTHS = [200, 175, 155, 95, 120, 85, 100, 90, 82, 98];
+const OUTBOUND_VALUE_WIDTHS = [45, 30, 55, 25, 40, 35, 20, 50, 38, 28];
+
 // Skeleton component for OutboundLinksList
 const OutboundLinksListSkeleton = memo(({ size = "small" }: { size?: "small" | "large" }) => {
-  // Generate widths following Pareto principle with top item at 100%
-  const widths = Array.from({ length: 10 }, (_, i) => {
-    if (i === 0) {
-      return 100;
-    } else if (i === 1) {
-      return 60 + Math.random() * 20;
-    } else {
-      const factor = 1 - (i - 2) / 8;
-      return 10 + factor * 30;
-    }
-  });
-
-  const labelWidths = Array.from({ length: 10 }, (_, i) => {
-    return i < 3 ? 150 + Math.random() * 100 : 80 + Math.random() * 120;
-  });
-
-  const valueWidths = Array.from({ length: 10 }, () => 20 + Math.random() * 40);
+  const widths = OUTBOUND_WIDTHS;
+  const labelWidths = OUTBOUND_LABEL_WIDTHS;
+  const valueWidths = OUTBOUND_VALUE_WIDTHS;
 
   return (
     <div className="flex flex-col gap-2 pr-2">

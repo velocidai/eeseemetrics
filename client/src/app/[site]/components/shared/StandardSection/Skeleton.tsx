@@ -1,31 +1,15 @@
 import { memo } from "react";
 
+// Deterministic widths — avoids Math.random() during render which would cause
+// React hydration mismatches (server/client values differ).
+const WIDTHS = [100, 70, 40, 33, 28, 23, 18, 16, 14, 11];
+const LABEL_WIDTHS = [120, 95, 85, 55, 70, 45, 60, 50, 42, 58];
+const VALUE_WIDTHS = [45, 30, 55, 25, 40, 35, 20, 50, 38, 28];
+
 export const StandardSkeleton = memo(() => {
-  // Generate widths following Pareto principle with top item at 100%
-  const widths = Array.from({ length: 10 }, (_, i) => {
-    if (i === 0) {
-      // First item always has 100% width
-      return 100;
-    } else if (i === 1) {
-      // Second item gets large width (60-80%)
-      return 60 + Math.random() * 20;
-    } else {
-      // Remaining 8 items get progressively smaller widths (10-40%)
-      const factor = 1 - (i - 2) / 8; // Creates a declining factor from 1 to 0.125
-      return 10 + factor * 30; // Creates widths from ~40% down to ~15%
-    }
-  });
-
-  // Generate random widths for label and value placeholders
-  const labelWidths = Array.from({ length: 10 }, (_, i) => {
-    // First few items get wider labels (increased by 2.5x)
-    return i < 3 ? 75 + Math.random() * 100 : 40 + Math.random() * 60;
-  });
-
-  const valueWidths = Array.from(
-    { length: 10 },
-    () => 20 + Math.random() * 40 // Between 20px and 60px (increased by 2.5x)
-  );
+  const widths = WIDTHS;
+  const labelWidths = LABEL_WIDTHS;
+  const valueWidths = VALUE_WIDTHS;
 
   return (
     <>

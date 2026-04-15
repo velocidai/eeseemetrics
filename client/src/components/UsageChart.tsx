@@ -83,6 +83,9 @@ export function UsageChart({ organizationId, timeZone = "UTC" }: UsageChartProps
         error={error}
         maxTickCount={6}
       />
+      <p className="mt-2 text-xs text-neutral-400 dark:text-neutral-500">
+        {t("Only pageviews count toward your monthly limit.")}
+      </p>
     </div>
   );
 }

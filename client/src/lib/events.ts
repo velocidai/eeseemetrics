@@ -2,8 +2,6 @@
 // Event Types and Configuration
 // ============================================================================
 
-export type TranslationFunction = (key: string, values?: Record<string, string>) => string;
-
 export type EventType =
   | "pageview"
   | "custom_event"
@@ -43,42 +41,32 @@ export interface EventLike {
 }
 
 // Helper to generate display name for auto-captured events
-export function getEventDisplayName(item: EventLike, t?: TranslationFunction): string {
+export function getEventDisplayName(item: EventLike): string {
   if (item.event_name) return item.event_name;
-
-  const translate = (key: string, values?: Record<string, string>) => {
-    const translated = t ? t(key, values) : key;
-    if (!values) return translated;
-
-    return Object.entries(values).reduce(
-      (result, [placeholder, value]) => result.replaceAll(`{${placeholder}}`, () => value),
-      translated
-    );
-  };
 
   switch (item.type) {
     case "outbound":
-      return translate("Outbound Click");
+      return "Outbound Click";
     case "button_click":
-      if (item.props?.text) return translate("Clicked button with text \"{text}\"", { text: item.props.text });
-      return translate("Clicked button");
+      if (item.props?.text) return `Clicked button with text "${item.props.text}"`;
+      return "Clicked button";
     case "copy": {
-      if (!item.props?.text) return translate("Copied text");
+      if (!item.props?.text) return "Copied text";
       const text = String(item.props.text);
-      return translate("Copied \"{text}\"", { text: `${text.substring(0, 50)}${text.length > 50 ? "..." : ""}` });
+      return `Copied "${text.substring(0, 50)}${text.length > 50 ? "..." : ""}"`;
     }
     case "form_submit":
-      if (item.props?.formId) return translate("Submitted form \"{name}\"", { name: item.props.formId });
-      if (item.props?.formName) return translate("Submitted form \"{name}\"", { name: item.props.formName });
-      if (item.props?.formAction) return translate("Submitted form to \"{action}\"", { action: item.props.formAction });
-      return translate("Submitted form");
+      if (item.props?.formId) return `Submitted form "${item.props.formId}"`;
+      if (item.props?.formName) return `Submitted form "${item.props.formName}"`;
+      if (item.props?.formAction) return `Submitted form to "${item.props.formAction}"`;
+      return "Submitted form";
     case "input_change": {
       const inputType = item.props?.inputType ? `${item.props.inputType} ` : "";
-      if (item.props?.inputName) return translate("Changed {type}input \"{name}\"", { type: inputType, name: item.props.inputName });
-      return translate("Changed {type}input", { type: inputType });
+      if (item.props?.inputName) return `Changed ${inputType}input "${item.props.inputName}"`;
+      return `Changed ${inputType}input`;
     }
     default:
-      return translate("Event");
+      return "Event";
   }
 }
 

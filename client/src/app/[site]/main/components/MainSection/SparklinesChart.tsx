@@ -27,12 +27,18 @@ export function SparklinesChart({
     })
     .filter(e => e !== null);
 
+  // Need at least 2 data points to draw a line; rendering with 0-1 points
+  // causes Nivo to attempt an invalid SVG path calculation.
+  if (!formattedData || formattedData.length < 2) {
+    return null;
+  }
+
   return (
     <ResponsiveLine
       data={[
         {
           id: "1",
-          data: formattedData ?? [],
+          data: formattedData,
         },
       ]}
       theme={nivoTheme}

@@ -124,19 +124,18 @@ export function EventProperties({ properties, isLoading, selectedEvent, size = "
   );
 }
 
+// Deterministic width patterns for skeleton — avoids Math.random() during render
+// which would cause React hydration mismatches (server/client values differ).
+const SKELETON_VALUE_WIDTHS = [60, 40, 75, 50, 35, 80, 45, 65, 30, 70];
+const SKELETON_BAR_WIDTHS = [50, 30, 65, 45, 25, 70, 55, 35, 80, 40];
+
 // Skeleton component for EventProperties
 const EventPropertiesSkeleton = memo(({ size = "small" }: { size?: "small" | "large" }) => {
-  // Generate random number of property groups (2-4)
-  const groupCount = 2 + Math.floor(Math.random() * 3);
+  const groupCount = 3;
+  const propertyCounts = [3, 2, 4];
 
-  // Generate random number of properties per group (2-5)
-  const propertyCounts = Array.from({ length: groupCount }, () => 2 + Math.floor(Math.random() * 4));
-
-  // Generate random widths for property values
-  const generateWidths = (count: number) => Array.from({ length: count }, () => 20 + Math.random() * 80);
-
-  // Generate random widths for property bars
-  const generateBarWidths = (count: number) => Array.from({ length: count }, () => 20 + Math.random() * 80);
+  const generateWidths = (count: number) => SKELETON_VALUE_WIDTHS.slice(0, count);
+  const generateBarWidths = (count: number) => SKELETON_BAR_WIDTHS.slice(0, count);
 
   return (
     <div className={cn("flex flex-col gap-4 overflow-y-auto pr-2", size === "small" ? "max-h-[30vh]" : "max-h-[60vh]")}>

@@ -1,19 +1,22 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { memo, useMemo } from "react";
+import { memo } from "react";
 
 import { cn } from "../../../lib/utils";
 
+// Deterministic patterns — avoids Math.random() during render which would cause
+// React hydration mismatches (server/client values differ).
+const TIMELINE_CONTENT_WIDTHS = ["w-64","w-48","w-80","w-56","w-72","w-32","w-96","w-48","w-64","w-56","w-72","w-80","w-32","w-64","w-48","w-96","w-56","w-72","w-80","w-32"];
+const TIMELINE_HAS_SECONDARY = [true,false,true,true,false,true,false,true,false,true,true,false,true,false,true,true,false,true,false,true];
+const TIMELINE_SECONDARY_WIDTHS = ["w-24","w-16","w-24","w-16","w-24","w-24","w-16","w-24","w-16","w-16","w-24","w-16","w-24","w-16","w-24","w-16","w-24","w-16","w-24","w-24"];
+
 export const SessionDetailsTimelineSkeleton = memo(
   ({ itemCount }: { itemCount: number }) => {
-    // Generate stable random widths for timeline items
-    const itemWidths = useMemo(() => {
-      const widths = ["w-32", "w-48", "w-56", "w-64", "w-72", "w-80", "w-96"];
-      return Array.from({ length: Math.min(itemCount, 100) }).map(() => ({
-        content: widths[Math.floor(Math.random() * widths.length)],
-        hasSecondary: Math.random() > 0.5,
-        secondaryWidth: Math.random() > 0.5 ? "w-24" : "w-16",
-      }));
-    }, [itemCount]);
+    const count = Math.min(itemCount, 100);
+    const itemWidths = Array.from({ length: count }, (_, i) => ({
+      content: TIMELINE_CONTENT_WIDTHS[i % TIMELINE_CONTENT_WIDTHS.length],
+      hasSecondary: TIMELINE_HAS_SECONDARY[i % TIMELINE_HAS_SECONDARY.length],
+      secondaryWidth: TIMELINE_SECONDARY_WIDTHS[i % TIMELINE_SECONDARY_WIDTHS.length],
+    }));
 
     return (
       <div className="mt-4">

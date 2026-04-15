@@ -27,7 +27,7 @@ export function EnableWebVitals() {
           </AlertTitle>
           <AlertDescription className="text-sm text-neutral-700/80 dark:text-neutral-300/80">
             <div className="mb-2">
-              {t("Web Vitals collection provides Core Web Vitals metrics like LCP, CLS, and INP.")} <b>{t("Note:")}</b> {t("Enabling Web Vitals will increase your event usage.")}
+              {t("Web Vitals collection provides Core Web Vitals metrics like LCP, CLS, and INP.")}
             </div>
             <Button
               size="sm"

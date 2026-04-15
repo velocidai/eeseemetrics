@@ -4,6 +4,8 @@ export const BACKEND_URL =
     : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
 export const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
 export const IS_CLOUD = process.env.NEXT_PUBLIC_CLOUD === "true";
+// Turnstile is only active when both cloud mode and a valid site key are configured
+export const TURNSTILE_ENABLED = IS_CLOUD && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 // Time constants
 export const MINUTES_IN_24_HOURS = 24 * 60; // 1440 minutes

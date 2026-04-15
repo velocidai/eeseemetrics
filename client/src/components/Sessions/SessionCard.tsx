@@ -326,24 +326,13 @@ export function SessionCard({ session, onClick, userId, expandedByDefault, highl
   );
 }
 
+// Pre-computed deterministic width patterns — avoids Math.random() during render
+// which would cause React hydration mismatches (server/client values differ).
+const SKELETON_WIDTHS = ["w-28","w-20","w-36","w-24","w-40","w-16","w-32","w-44","w-20","w-28","w-36","w-16","w-32","w-24","w-40","w-20","w-28","w-36","w-32","w-16","w-44","w-24","w-20","w-36","w-28"];
+const SKELETON_TIME_WIDTHS = ["w-24","w-28","w-20","w-32","w-24","w-28","w-20","w-32","w-24","w-28","w-20","w-32","w-24","w-28","w-20","w-32","w-24","w-28","w-20","w-32","w-24","w-28","w-20","w-32","w-24"];
+const SKELETON_DURATION_WIDTHS = ["w-12","w-10","w-14","w-12","w-10","w-14","w-12","w-10","w-14","w-12","w-14","w-12","w-10","w-14","w-12","w-10","w-14","w-12","w-10","w-14","w-12","w-10","w-14","w-12","w-10"];
+
 export const SessionCardSkeleton = memo(({ userId, count }: { userId?: string; count?: number }) => {
-  // Function to get a random width class for skeletons
-  const getRandomWidth = () => {
-    const widths = ["w-16", "w-20", "w-24", "w-28", "w-32", "w-36", "w-40", "w-44", "w-48"];
-    return widths[Math.floor(Math.random() * widths.length)];
-  };
-
-  // Get random width for time displays
-  const getRandomTimeWidth = () => {
-    const widths = ["w-20", "w-24", "w-28", "w-32"];
-    return widths[Math.floor(Math.random() * widths.length)];
-  };
-
-  // Get random width for duration displays
-  const getRandomDurationWidth = () => {
-    const widths = ["w-10", "w-12", "w-14"];
-    return widths[Math.floor(Math.random() * widths.length)];
-  };
 
   // Create multiple skeletons for a realistic loading state
   const skeletons = Array.from({ length: count || 25 }).map((_, index) => (
@@ -360,7 +349,7 @@ export const SessionCardSkeleton = memo(({ userId, count }: { userId?: string; c
               <Skeleton className="h-6 w-6 rounded-full" />
               <Skeleton className="h-3 w-24" />
             </div>
-            <Skeleton className={cn("h-3", getRandomTimeWidth())} />
+            <Skeleton className={cn("h-3", SKELETON_TIME_WIDTHS[index % SKELETON_TIME_WIDTHS.length])} />
           </div>
 
           {/* Bottom row - Icons, badges, channel */}
@@ -400,18 +389,18 @@ export const SessionCardSkeleton = memo(({ userId, count }: { userId?: string; c
             <Skeleton className="h-[21px] w-16 rounded-sm" />
           </div>
 
-          {/* Entry/Exit paths with randomized widths */}
+          {/* Entry/Exit paths with deterministic widths */}
           <div className="items-center ml-3 flex-1 min-w-0 flex">
-            <Skeleton className={cn("h-3 max-w-[200px]", getRandomWidth())} />
+            <Skeleton className={cn("h-3 max-w-[200px]", SKELETON_WIDTHS[index % SKELETON_WIDTHS.length])} />
             <ArrowRight className="mx-2 w-3 h-3 shrink-0 text-neutral-500 dark:text-neutral-400 opacity-20" />
-            <Skeleton className={cn("h-3 max-w-[200px]", getRandomWidth())} />
+            <Skeleton className={cn("h-3 max-w-[200px]", SKELETON_WIDTHS[(index + 5) % SKELETON_WIDTHS.length])} />
           </div>
 
           {/* Time information */}
           <div className="flex items-center gap-1.5">
-            <Skeleton className={cn("h-3", getRandomTimeWidth())} />
+            <Skeleton className={cn("h-3", SKELETON_TIME_WIDTHS[index % SKELETON_TIME_WIDTHS.length])} />
             <span className="text-neutral-500 dark:text-neutral-400 opacity-20">•</span>
-            <Skeleton className={cn("h-3", getRandomDurationWidth())} />
+            <Skeleton className={cn("h-3", SKELETON_DURATION_WIDTHS[index % SKELETON_DURATION_WIDTHS.length])} />
           </div>
 
           {/* Expand icon */}

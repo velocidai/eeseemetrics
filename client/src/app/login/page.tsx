@@ -14,7 +14,7 @@ import { SpinningGlobe } from "../../components/SpinningGlobe";
 import { useSetPageTitle } from "../../hooks/useSetPageTitle";
 import { authClient } from "../../lib/auth";
 import { useConfigs } from "../../lib/configs";
-import { IS_CLOUD } from "../../lib/const";
+import { IS_CLOUD, TURNSTILE_ENABLED } from "../../lib/const";
 import { userStore } from "../../lib/userStore";
 
 function LoginContent() {
@@ -36,8 +36,8 @@ function LoginContent() {
 
     setError("");
 
-    // Validate Turnstile token if in cloud mode and production
-    if (IS_CLOUD && process.env.NODE_ENV === "production" && !turnstileToken) {
+    // Validate Turnstile token if configured
+    if (TURNSTILE_ENABLED && !turnstileToken) {
       setError(t("Please complete the captcha verification"));
       setIsLoading(false);
       return;
@@ -51,7 +51,7 @@ function LoginContent() {
         },
         {
           onRequest: context => {
-            if (IS_CLOUD && process.env.NODE_ENV === "production" && turnstileToken) {
+            if (TURNSTILE_ENABLED && turnstileToken) {
               context.headers.set("x-captcha-response", turnstileToken);
             }
           },
@@ -73,7 +73,7 @@ function LoginContent() {
     setIsLoading(false);
   };
 
-  const turnstileEnabled = IS_CLOUD && process.env.NODE_ENV === "production";
+  const turnstileEnabled = TURNSTILE_ENABLED;
 
   return (
     <div className="flex h-dvh w-full">

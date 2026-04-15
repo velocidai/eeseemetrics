@@ -81,7 +81,7 @@ export function TraitValueUsersList({
             <div className="w-56 shrink">
               <div
                 className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded"
-                style={{ width: `${20 + Math.random() * 100}px` }}
+                style={{ width: `${[60, 40, 80, 50, 70, 35, 90, 55, 45, 75][i % 10]}px` }}
               />
             </div>
             <div className="flex items-center gap-1.5 shrink-0">

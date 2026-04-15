@@ -15,7 +15,7 @@ import { EeseeLogo, EeseeTextLogo } from "../../components/EeseeLogo";
 import { useSetPageTitle } from "../../hooks/useSetPageTitle";
 import { authClient } from "../../lib/auth";
 import { useConfigs } from "../../lib/configs";
-import { BACKEND_URL, IS_CLOUD } from "../../lib/const";
+import { BACKEND_URL, IS_CLOUD, TURNSTILE_ENABLED } from "../../lib/const";
 import { trackAdEvent } from "../../lib/trackAdEvent";
 import { userStore } from "../../lib/userStore";
 import { cn, isValidDomain, normalizeDomain } from "../../lib/utils";
@@ -76,7 +76,7 @@ function SignupPageContent() {
     setError("");
 
     try {
-      if (IS_CLOUD && !turnstileToken) {
+      if (TURNSTILE_ENABLED && !turnstileToken) {
         setError(t("Please complete the captcha verification"));
         setIsLoading(false);
         return;
@@ -90,7 +90,7 @@ function SignupPageContent() {
         },
         {
           onRequest: context => {
-            if (IS_CLOUD && turnstileToken) {
+            if (TURNSTILE_ENABLED && turnstileToken) {
               context.headers.set("x-captcha-response", turnstileToken);
             }
           },

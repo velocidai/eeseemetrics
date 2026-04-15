@@ -4,7 +4,7 @@ import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { authClient } from "../../../lib/auth";
 import { userStore } from "../../../lib/userStore";
-import { IS_CLOUD } from "../../../lib/const";
+import { TURNSTILE_ENABLED } from "../../../lib/const";
 import { AuthInput } from "@/components/auth/AuthInput";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { AuthError } from "@/components/auth/AuthError";
@@ -30,7 +30,7 @@ export function Signup({ callbackURL }: SignupProps) {
 
     try {
       // Validate Turnstile token if in cloud mode
-      if (IS_CLOUD && !turnstileToken) {
+      if (TURNSTILE_ENABLED && !turnstileToken) {
         setError(t("Please complete the captcha verification"));
         setIsLoading(false);
         return;
@@ -44,7 +44,7 @@ export function Signup({ callbackURL }: SignupProps) {
         },
         {
           onRequest: context => {
-            if (IS_CLOUD && turnstileToken) {
+            if (TURNSTILE_ENABLED && turnstileToken) {
               context.headers.set("x-captcha-response", turnstileToken);
             }
           },
@@ -97,12 +97,12 @@ export function Signup({ callbackURL }: SignupProps) {
         <AuthButton
           isLoading={isLoading}
           loadingText={t("Creating account...")}
-          disabled={IS_CLOUD ? !turnstileToken || isLoading : isLoading}
+          disabled={TURNSTILE_ENABLED ? !turnstileToken || isLoading : isLoading}
         >
           {t("Sign Up to Accept Invitation")}
         </AuthButton>
 
-        {IS_CLOUD && (
+        {TURNSTILE_ENABLED && (
           <Turnstile
             onSuccess={token => setTurnstileToken(token)}
             onError={() => setTurnstileToken("")}

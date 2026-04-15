@@ -265,7 +265,7 @@ export function PageviewItem({
                 </div>
               </Link>
             ) : (
-              <div className="text-sm truncate">{getEventDisplayName(item, t)}</div>
+              <div className="text-sm truncate">{getEventDisplayName(item)}</div>
             )}
           </div>
 
