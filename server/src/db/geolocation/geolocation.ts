@@ -111,8 +111,8 @@ function setCachedIP(ip: string, data: LocationResponse): void {
 
 async function getLocationFromIPAPI(ips: string[]): Promise<Record<string, LocationResponse>> {
   if (!apiKey) {
-    logger.warn("IPAPI_KEY not configured for cloud geolocation");
-    return {};
+    logger.warn("IPAPI_KEY not configured for cloud geolocation, falling back to local MaxMind DB");
+    return getLocationFromLocal(ips);
   }
 
   // Check cache first
@@ -207,10 +207,11 @@ async function getLocationFromIPAPI(ips: string[]): Promise<Record<string, Locat
       }
     }
 
-    return results;
+    // localInfo is MaxMind fallback for any IPs not covered by IPAPI response
+    return { ...localInfo, ...results };
   } catch (error) {
     logger.error(error, "Error fetching from IPAPI");
-    return { ...results, ...localInfo };
+    return { ...localInfo, ...results };
   }
 }
 

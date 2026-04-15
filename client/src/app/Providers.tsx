@@ -30,9 +30,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <Toaster />
         </TooltipProvider>
       </ThemeProvider>
-      {appEnv === "prod" && (
-        <Script src="https://app.eeseemetrics.com/api/script.js" data-site-id="1" strategy="afterInteractive" />
-      )}
       {appEnv === "prod" && IS_CLOUD && (
         <>
           <Script id="rewardful-queue" strategy="beforeInteractive">
