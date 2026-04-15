@@ -89,6 +89,7 @@ export async function createLtdCheckoutSession(
         ltd_pageview_limit: String(eventLimit),
       },
       customer_email: request.user?.email,
+      billing_address_collection: "required",
       allow_promotion_codes: true,
       automatic_tax: { enabled: true },
     });
