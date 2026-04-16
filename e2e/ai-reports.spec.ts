@@ -37,6 +37,7 @@ test.describe("AI Reports — on-demand trigger", () => {
   });
 
   test("POST /api/admin/ai-report/trigger returns 200 for weekly cadence", async () => {
+    test.setTimeout(90000); // AI report generation calls an LLM — can take > 30s
     const ctx = await apiRequest.newContext();
     const resp = await ctx.post(`${API}/api/admin/ai-report/trigger`, {
       data: { siteId: SITE_ID, cadence: "weekly" },

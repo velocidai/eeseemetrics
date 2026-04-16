@@ -27,7 +27,31 @@ export async function handleWebhook(request: FastifyRequest, reply: FastifyReply
       return reply.status(400).send("Webhook error: No raw body available");
     }
 
-    event = (stripe as Stripe).webhooks.constructEvent(rawBody, sig as string, webhookSecret);
+    // Try the primary (live) webhook secret first
+    let verified = false;
+    try {
+      event = (stripe as Stripe).webhooks.constructEvent(rawBody, sig as string, webhookSecret);
+      verified = true;
+    } catch {
+      // Fall through to test secret if configured
+    }
+
+    // If live secret failed, try optional test webhook secret (used with `stripe listen --forward-to`)
+    if (!verified) {
+      const testWebhookSecret = process.env.STRIPE_TEST_WEBHOOK_SECRET;
+      if (testWebhookSecret) {
+        try {
+          event = (stripe as Stripe).webhooks.constructEvent(rawBody, sig as string, testWebhookSecret);
+          verified = true;
+        } catch {
+          // Both secrets failed
+        }
+      }
+    }
+
+    if (!verified) {
+      return reply.status(400).send("Webhook Error: signature verification failed");
+    }
   } catch (err: any) {
     console.error(`Webhook signature verification failed: ${err.message}`);
     return reply.status(400).send(`Webhook Error: ${err.message}`);

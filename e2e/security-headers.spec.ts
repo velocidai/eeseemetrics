@@ -35,6 +35,19 @@ test.describe("Security headers — Next.js client", () => {
     });
   }
 
+  test("client has Strict-Transport-Security on HTTPS", async () => {
+    if (!BASE.startsWith("https")) {
+      test.skip();
+      return;
+    }
+    const ctx = await apiRequest.newContext();
+    const resp = await ctx.get(`${BASE}/login`);
+    const hsts = resp.headers()["strict-transport-security"] ?? "";
+    expect(hsts).toBeTruthy();
+    expect(hsts).toContain("max-age=");
+    await ctx.dispose();
+  });
+
   test("client has Content-Security-Policy with frame-ancestors", async () => {
     const ctx = await apiRequest.newContext();
     const resp = await ctx.get(`${BASE}/login`);

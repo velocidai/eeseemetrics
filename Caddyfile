@@ -1,5 +1,8 @@
 # Caddyfile
 {$DOMAIN_NAME} {
+    # Security headers
+    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
     # Enable compression
     encode zstd gzip
 

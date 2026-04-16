@@ -16,11 +16,13 @@ const BASE = process.env.E2E_BASE_URL ?? "http://localhost:3002";
 
 // Written by global-setup.ts
 const AUTH_FILE = path.join(__dirname, ".auth", "session.json");
+const LTD_AUTH_FILE = path.join(__dirname, ".auth", "session-ltd.json");
 
 interface AuthState {
   name: string;
-  value: string;
-  sessionCookie: string; // "name=value"
+  value: string; // decoded (for API Cookie headers)
+  rawValue?: string; // URL-encoded (for addCookies — avoids +// issues)
+  sessionCookie: string; // "name=decoded-value"
   timestamp: number;
 }
 
@@ -29,8 +31,10 @@ export async function getSessionCookie(
   email = process.env.E2E_PRO_USER_EMAIL ?? "",
   password = process.env.E2E_PRO_USER_PASSWORD ?? ""
 ): Promise<string> {
+  const isLtdUser = email === (process.env.E2E_LTD_USER_EMAIL ?? "");
+  const cacheFile = isLtdUser ? LTD_AUTH_FILE : AUTH_FILE;
   try {
-    const state: AuthState = JSON.parse(fs.readFileSync(AUTH_FILE, "utf-8"));
+    const state: AuthState = JSON.parse(fs.readFileSync(cacheFile, "utf-8"));
     if (state.sessionCookie) return state.sessionCookie;
   } catch {
     // file missing or corrupt — fall through to live sign-in
@@ -68,42 +72,50 @@ export async function login(
   password = process.env.E2E_PRO_USER_PASSWORD ?? ""
 ): Promise<void> {
   const isDefaultUser = email === (process.env.E2E_PRO_USER_EMAIL ?? "");
+  const isLtdUser = email === (process.env.E2E_LTD_USER_EMAIL ?? "");
+  const cacheFile = isLtdUser ? LTD_AUTH_FILE : AUTH_FILE;
 
   let name = "";
-  let value = "";
+  // cookieValue is URL-encoded for use in addCookies (avoids +/% issues)
+  let cookieValue = "";
 
-  if (isDefaultUser) {
-    // Try to load pre-saved auth state for the default user
+  if (isDefaultUser || isLtdUser) {
+    // Try to load pre-saved auth state from global-setup cache
     try {
-      const state: AuthState = JSON.parse(fs.readFileSync(AUTH_FILE, "utf-8"));
-      if (state.name && state.value) {
+      const state: AuthState = JSON.parse(fs.readFileSync(cacheFile, "utf-8"));
+      if (state.name && (state.rawValue ?? state.value)) {
         name = state.name;
-        value = state.value;
+        // Prefer rawValue (URL-encoded); fall back to encoded form of value
+        cookieValue = state.rawValue ?? encodeURIComponent(state.value);
       }
     } catch {
       // No cached state — fall through to live sign-in
     }
   }
 
-  if (!name || !value) {
-    // Live sign-in for non-default users or when cache is missing
-    const resp = await page.request.post(`${API}/api/auth/sign-in/email`, {
+  if (!name || !cookieValue) {
+    // Live sign-in fallback: use a fresh API context so the response Set-Cookie
+    // is accessible. Keep the value URL-encoded for addCookies.
+    const { request: pwRequest } = await import("@playwright/test");
+    const ctx = await pwRequest.newContext();
+    const resp = await ctx.post(`${API}/api/auth/sign-in/email`, {
       data: { email, password },
       headers: { "Content-Type": "application/json", Origin: BASE },
     });
     const setCookie = resp.headers()["set-cookie"] ?? "";
+    await ctx.dispose();
     const match = setCookie.match(/((?:__Secure-)?better-auth\.session_token)=([^;]+)/);
     if (match) {
       name = match[1];
-      value = decodeURIComponent(match[2]);
+      cookieValue = match[2]; // URL-encoded from Set-Cookie header
     }
   }
 
-  if (name && value) {
+  if (name && cookieValue) {
     await page.context().addCookies([
       {
         name,
-        value,
+        value: cookieValue, // URL-encoded — sent as-is in Cookie header
         domain: new URL(BASE).hostname,
         path: "/",
         httpOnly: true,

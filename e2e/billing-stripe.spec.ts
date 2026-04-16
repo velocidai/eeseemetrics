@@ -52,27 +52,30 @@ test.describe("Billing — API endpoints", () => {
     sessionCookie = await getSessionCookie();
   });
 
-  test("GET /api/stripe/subscription returns shape with planName", async () => {
+  test("GET /api/stripe/subscription returns full shape", async () => {
     test.skip(!ORG_ID, "Requires E2E_ORG_ID");
     const ctx = await apiRequest.newContext();
     const resp = await ctx.get(`${API}/api/stripe/subscription?organizationId=${ORG_ID}`, {
       headers: { Cookie: sessionCookie },
     });
-    // Could be 200 (has subscription) or 404/200 empty for starter
     expect([200, 404]).toContain(resp.status());
     if (resp.status() === 200) {
       const body = await resp.json();
-      // Must have at least one of these fields
-      const hasExpectedShape =
-        body?.planName !== undefined ||
-        body?.status !== undefined ||
-        Array.isArray(body);
-      expect(hasExpectedShape).toBe(true);
+      // Required fields present on all subscription paths
+      expect(body).toHaveProperty("planName");
+      expect(body).toHaveProperty("eventLimit");
+      expect(body).toHaveProperty("monthlyEventCount");
+      // Types
+      expect(typeof body.monthlyEventCount).toBe("number");
+      // eventLimit is null (unlimited) or a number
+      expect(body.eventLimit === null || typeof body.eventLimit === "number").toBe(true);
+      // isLtd is only present on LTD subscriptions
+      if ("isLtd" in body) expect(typeof body.isLtd).toBe("boolean");
     }
     await ctx.dispose();
   });
 
-  test("GET /api/stripe/invoices returns array", async () => {
+  test("GET /api/stripe/invoices returns array with correct shape", async () => {
     test.skip(!ORG_ID, "Requires E2E_ORG_ID");
     const ctx = await apiRequest.newContext();
     const resp = await ctx.get(`${API}/api/stripe/invoices?organizationId=${ORG_ID}`, {
@@ -82,6 +85,15 @@ test.describe("Billing — API endpoints", () => {
     if (resp.status() === 200) {
       const body = await resp.json();
       expect(Array.isArray(body)).toBe(true);
+      if (body.length > 0) {
+        const invoice = body[0];
+        expect(invoice).toHaveProperty("id");
+        expect(invoice).toHaveProperty("amount");
+        expect(invoice).toHaveProperty("status");
+        // date field may be named date, created, or createdAt
+        const hasDate = "date" in invoice || "created" in invoice || "createdAt" in invoice;
+        expect(hasDate).toBe(true);
+      }
     }
     await ctx.dispose();
   });

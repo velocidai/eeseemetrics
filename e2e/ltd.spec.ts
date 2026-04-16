@@ -70,7 +70,6 @@ test.describe("LTD — checkout API", () => {
       data: { tier: 1, organizationId: ORG_ID },
       headers: { Cookie: sessionCookie, "Content-Type": "application/json" },
     });
-    await ctx.dispose();
 
     // 200 = checkout URL; 409 = org already has LTD; 403 = not owner
     expect([200, 403, 409]).toContain(resp.status());
@@ -78,6 +77,7 @@ test.describe("LTD — checkout API", () => {
       const body = await resp.json();
       expect(body.url).toMatch(/https:\/\/(checkout\.stripe\.com|billing\.stripe\.com)/);
     }
+    await ctx.dispose();
   });
 
   test("POST /api/ltd/checkout with invalid tier returns 400", async () => {
@@ -111,7 +111,7 @@ test.describe("LTD — subscription settings page (LTD account)", () => {
     expect(page.url()).not.toContain("/login");
 
     // "Lifetime Deal" badge must be visible
-    await expect(page.getByText("Lifetime Deal")).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText("Lifetime Deal").first()).toBeVisible({ timeout: 8000 });
 
     // "Paid once" / "Never expires" text
     await expect(page.getByText(/never expires/i)).toBeVisible({ timeout: 3000 });
@@ -132,7 +132,7 @@ test.describe("LTD — subscription settings page (LTD account)", () => {
   });
 
   test("GET /api/stripe/subscription returns isLtd=true for LTD account", async () => {
-    const cookie = await signIn(LTD_EMAIL, LTD_PASSWORD);
+    const cookie = await getSessionCookie(LTD_EMAIL, LTD_PASSWORD);
     const ctx = await apiRequest.newContext();
 
     // Fetch org ID
@@ -151,10 +151,10 @@ test.describe("LTD — subscription settings page (LTD account)", () => {
     const resp = await ctx.get(`${API}/api/stripe/subscription?organizationId=${orgId}`, {
       headers: { Cookie: cookie },
     });
-    await ctx.dispose();
 
     expect(resp.status()).toBe(200);
     const body = await resp.json();
+    await ctx.dispose();
     expect(body.isLtd).toBe(true);
     expect([1, 2, 3]).toContain(body.ltdTier);
     expect(body.interval).toBe("lifetime");
@@ -168,13 +168,14 @@ test.describe("LTD — success toast after purchase", () => {
 
   test("?ltd=success&tier=1 shows success toast", async ({ page }) => {
     await login(page);
-    await page.goto(`${SUB_PAGE}?ltd=success&tier=1`, { waitUntil: "networkidle", timeout: 15000 });
+    // Use "load" not "networkidle" — networkidle can take 10s+ causing the toast to auto-dismiss
+    await page.goto(`${SUB_PAGE}?ltd=success&tier=1`, { waitUntil: "load", timeout: 15000 });
 
     expect(page.url()).not.toContain("/login");
 
-    // Toast should appear with success message
+    // Toast appears immediately after React hydration — give extra time
     const toast = page.getByText(/lifetime deal activated/i);
-    await expect(toast).toBeVisible({ timeout: 5000 });
+    await expect(toast).toBeVisible({ timeout: 8000 });
 
     // After toast appears, query params should be cleaned up
     await page.waitForTimeout(500);

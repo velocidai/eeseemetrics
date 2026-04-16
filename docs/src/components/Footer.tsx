@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useExtracted } from "next-intl";
+import { Github, XIcon } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
@@ -109,11 +110,6 @@ export function Footer() {
                   {t("API Reference")}
                 </Link>
               </li>
-              <li>
-                <a href="https://github.com/velocidai/eeseemetrics" target="_blank" rel="noopener noreferrer" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
-                  {t("GitHub")}
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -159,7 +155,13 @@ export function Footer() {
         <div className="pt-8 border-t border-neutral-200 dark:border-neutral-800">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-sm text-neutral-400">{t("© {year} Eesee Metrics. All rights reserved.", { year: String(new Date().getFullYear()) })}</div>
-            <div className="text-sm text-neutral-400 space-x-4 flex items-center">
+            <div className="flex items-center gap-4">
+              <a href="https://x.com/eeseemetrics" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                <XIcon className="h-4 w-4" />
+              </a>
+              <a href="https://github.com/velocidai/eeseemetrics" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                <Github className="h-4 w-4" />
+              </a>
               <ThemeSwitcher />
               <LanguageSwitcher />
             </div>

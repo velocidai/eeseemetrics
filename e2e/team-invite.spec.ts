@@ -76,9 +76,73 @@ test.describe("Team & Invite — API", () => {
       data: { email: "not-an-email", role: "member" },
       headers: { Cookie: sessionCookie, "Content-Type": "application/json" },
     });
-    // Should reject invalid email with 4xx
     expect(resp.status()).toBeGreaterThanOrEqual(400);
     expect(resp.status()).toBeLessThan(500);
+    await ctx.dispose();
+  });
+
+  test("invite lifecycle: POST invite → appears in pending list → DELETE removes it", async () => {
+    const ctx = await apiRequest.newContext();
+
+    // Get org ID
+    const orgsResp = await ctx.get(`${API}/api/user/organizations`, {
+      headers: { Cookie: sessionCookie },
+    });
+    const orgs = await orgsResp.json();
+    const orgId = Array.isArray(orgs) ? orgs[0]?.id : orgs?.id;
+    if (!orgId) {
+      await ctx.dispose();
+      test.skip();
+      return;
+    }
+
+    const testEmail = `e2e-invite-test-${Date.now()}@example-e2e.invalid`;
+
+    // POST invite
+    const inviteResp = await ctx.post(`${API}/api/auth/organization/invite-member`, {
+      data: { email: testEmail, role: "member", organizationId: orgId },
+      headers: { Cookie: sessionCookie, "Content-Type": "application/json" },
+    });
+    // 200 = invited; 403 = member limit reached (acceptable on Starter)
+    expect([200, 201, 403]).toContain(inviteResp.status());
+
+    if (inviteResp.status() === 403) {
+      await ctx.dispose();
+      return; // Member limit — skip remainder without failing
+    }
+
+    // Verify invite appears in member list
+    const membersResp = await ctx.get(`${API}/api/organizations/${orgId}/members`, {
+      headers: { Cookie: sessionCookie },
+    });
+    expect(membersResp.status()).toBe(200);
+    const membersBody = await membersResp.json();
+    const invitations = membersBody.invitations ?? membersBody.data?.invitations ?? [];
+    const found = invitations.find((inv: any) => inv.email === testEmail);
+    expect(found).toBeTruthy();
+
+    // DELETE the invitation
+    const invitationId = found?.id;
+    if (invitationId) {
+      const deleteResp = await ctx.delete(
+        `${API}/api/auth/organization/delete-invitation`,
+        {
+          data: { invitationId },
+          headers: { Cookie: sessionCookie, "Content-Type": "application/json" },
+        }
+      );
+      expect([200, 204]).toContain(deleteResp.status());
+
+      // Verify removed
+      const afterResp = await ctx.get(`${API}/api/organizations/${orgId}/members`, {
+        headers: { Cookie: sessionCookie },
+      });
+      const afterBody = await afterResp.json();
+      const afterInvitations = afterBody.invitations ?? afterBody.data?.invitations ?? [];
+      const stillPresent = afterInvitations.find((inv: any) => inv.email === testEmail);
+      expect(stillPresent).toBeFalsy();
+    }
+
     await ctx.dispose();
   });
 });

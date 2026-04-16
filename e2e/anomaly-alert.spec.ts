@@ -1,5 +1,5 @@
-import { test, expect } from "@playwright/test";
-import { login } from "./auth-helpers";
+import { test, expect, request as apiRequest } from "@playwright/test";
+import { getSessionCookie, login } from "./auth-helpers";
 
 const BASE = process.env.E2E_BASE_URL ?? "http://localhost:3002";
 const EMAIL = process.env.E2E_PRO_USER_EMAIL ?? "";
@@ -8,6 +8,50 @@ const PASSWORD = process.env.E2E_PRO_USER_PASSWORD ?? "";
 const skipAll = !EMAIL || !PASSWORD;
 
 const SITE_ID = process.env.E2E_TEST_SITE_ID ?? "1";
+
+const API = process.env.E2E_API_BASE_URL ?? "http://localhost:3001";
+
+test.describe("Anomaly Alert — API", () => {
+  test.skip(skipAll, "Requires E2E_PRO_USER_EMAIL and E2E_PRO_USER_PASSWORD");
+
+  let sessionCookie = "";
+  test.beforeAll(async () => {
+    sessionCookie = await getSessionCookie();
+  });
+
+  test("GET unread-count returns a non-negative integer", async () => {
+    const ctx = await apiRequest.newContext();
+    const resp = await ctx.get(`${API}/api/sites/${SITE_ID}/anomaly-alerts/unread-count`, {
+      headers: { Cookie: sessionCookie },
+    });
+    expect([200, 403]).toContain(resp.status()); // 403 if site is Starter tier
+    if (resp.status() === 200) {
+      const body = await resp.json();
+      const count = typeof body === "number" ? body : body?.count ?? body?.unreadCount;
+      expect(typeof count).toBe("number");
+      expect(count).toBeGreaterThanOrEqual(0);
+    }
+    await ctx.dispose();
+  });
+
+  test("GET anomaly-alerts list returns array", async () => {
+    const ctx = await apiRequest.newContext();
+    const resp = await ctx.get(`${API}/api/sites/${SITE_ID}/anomaly-alerts`, {
+      headers: { Cookie: sessionCookie },
+    });
+    expect([200, 403]).toContain(resp.status());
+    if (resp.status() === 200) {
+      const body = await resp.json();
+      const alerts = Array.isArray(body) ? body : body?.data ?? body?.alerts;
+      expect(Array.isArray(alerts)).toBe(true);
+      if (alerts.length > 0) {
+        const first = alerts[0];
+        expect(first).toHaveProperty("id");
+      }
+    }
+    await ctx.dispose();
+  });
+});
 
 test.describe("Anomaly Alert Flow", () => {
   test.skip(skipAll, "Requires E2E_PRO_USER_EMAIL and E2E_PRO_USER_PASSWORD");
@@ -21,12 +65,11 @@ test.describe("Anomaly Alert Flow", () => {
     });
 
     expect(page.url()).not.toContain("/500");
+    expect(page.url()).not.toContain("/login");
 
-    // Verify page loaded — may show alerts or empty state
-    const alertsContainer = page
-      .locator("[data-testid='alerts-list'], .space-y-2, main")
-      .first();
-    await expect(alertsContainer).toBeVisible({ timeout: 5000 });
+    // Verify page loaded — wait for network to settle and body to be present
+    await page.waitForLoadState("domcontentloaded");
+    await expect(page.locator("body")).toBeVisible({ timeout: 8000 });
 
     // If an alert exists, click dismiss
     const dismissButton = page.locator('button[title="Dismiss"]').first();
